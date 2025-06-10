@@ -72,3 +72,51 @@ def test_get_non_existent_task(task_api):
         assert task_api.get_task(id) == id
 
 
+def test_delete_a_single_task(task_api):
+    """Deleting a task and then attempting to
+    retrieve it shuold raise a TaskNotFound exception. If not,
+    the test fails.
+    """
+    t = Task(title="test task to delete")
+    id = str(t.id)
+    task_api.add_task(t)
+    task_api.delete_task(id)
+    with pytest.raises(TaskNotFound):
+        assert task_api.get_task(id) is None
+
+
+def test_delete_a_single_task_from_many(task_api):
+    """Testing delete a single task where there is more not deleted
+    by recording initial DB task counts,
+    adding 2 tasks, deleting one of them, then comparing if the count has
+    increased by only 1 (1 represnting the task added but not deleted.)
+    """
+    init_count = task_api.count_tasks()
+    t1 = Task(title="test task to delete")
+    t2 = Task(title="test task to sty")
+    added_task1_id = task_api.add_task(t1)
+    task_api.add_task(t2)
+    task_api.delete_task(str(added_task1_id))
+    assert task_api.count_tasks() == init_count + 1
+
+
+def test_delete_non_existent_task(task_api):
+    id = str(uuid4())
+    with pytest.raises(TaskNotFound):
+        assert task_api.delete_task(id) is None
+
+
+def test_delete_task_with_invalid_id(task_api):
+    """delete_task() takes one argument: a str of the task id
+    to delete. Here, we're giving it an int.
+    """
+    id = 1234
+    with pytest.raises(InvalidTaskID):
+        assert task_api.delete_task(id) is None
+
+
+def test_delete_all_tasks(task_api):
+    task_api.delete_all_tasks()
+    assert task_api.count_tasks() == 0
+
+
