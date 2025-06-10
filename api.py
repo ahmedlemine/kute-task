@@ -47,6 +47,13 @@ class TaskAPI:
             session.commit()
             return task_id
 
+    def list_tasks(self) -> list[Task]:
+        """List all tasks in DB."""
+        with Session(self._engine) as session:
+            statement = select(Task)
+            results = session.exec(statement)
+            tasks = results.all()
+            return tasks
 
     def list_by_last_deferred(self) -> list[Task]:
         """List all tasks in database orderd by last_deferred first."""
