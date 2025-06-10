@@ -120,3 +120,72 @@ def test_delete_all_tasks(task_api):
     assert task_api.count_tasks() == 0
 
 
+def test_defer_task(task_api):
+    """defer_task() should update the last_deferred field of
+    a task to the current tiemstamp.
+    Which should push that task to the bottom of task list
+    when retrieved by last_deferred first.
+    This funciont tests if defferring a task pushes it to the -1 index
+    """
+    t = Task(title="task to be deferred")
+    added_task_id = task_api.add_task(t)
+    task_api.defer_task(str(added_task_id))
+    assert task_api.list_by_last_deferred()[-1].id == added_task_id
+
+
+def test_defer_task_with_invalid_id(task_api):
+    """defer_tak() takes one argument: a str of the task id
+    to defere. Here, we're giving it an int.
+    """
+    id = 1234
+    with pytest.raises(InvalidTaskID):
+        assert task_api.defer_task(id) is None
+
+
+def get_next_task(task_api):
+    """Get_next_task() should return the task at [0] index
+    of the task list if ordered by created_at
+    """
+    t1 = Task(title="Task 1")
+    t2 = Task(title="Task 2")
+    task_api.add_task(t1)
+    task_api.add_task(t2)
+    next_task = task_api.get_next_task()
+    first_task_in_task_list = task_api.list_tasks()[0]
+    assert next_task.id == first_task_in_task_list.id
+
+
+def test_get_next_task_returns_a_task(task_api):
+    """Tests if get_next_task() actually returns a Task"""
+    t1 = Task(title="Task 1")
+    t2 = Task(title="Task2")
+    task_api.add_task(t1)
+    task_api.add_task(t2)
+    next_task = task_api.get_next_task()
+    assert isinstance(next_task, Task)
+
+
+def test_get_task_with_invalid_id(task_api):
+    """get_task() takes one argument: a str of the task id to get.
+    Here, we're giving it an int.
+    """
+    id = 1234
+    with pytest.raises(InvalidTaskID):
+        assert task_api.get_task(id).id == id
+
+
+def test_list_tasks_by_last_deferred(task_api):
+    """Add a couple of tasks then defer a specfic one, which should
+    push it to the bottom of the tasks if listed by last_deferred first
+    (or most recent deferred last) then check if it indeed gets pushed to theme
+    -1 index.
+    """
+    t1 = Task(title="Latest task")
+    t2 = Task(title="Task to be deferred")
+    deferred_task_id = t2.id
+    task_api.add_task(t1)
+    task_api.add_task(t2)
+    task_api.defer_task(str(deferred_task_id))
+    assert task_api.list_by_last_deferred()[-1].id == deferred_task_id
+
+
