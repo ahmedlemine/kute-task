@@ -6,6 +6,7 @@ from datetime import datetime
 class Task(SQLModel, table=True):
     id: UUID | None = Field(default_factory=uuid4, primary_key=True)
     title: str
+    is_completed: bool = False
     created_at: datetime = Field(
         default_factory=datetime.now,
     )
