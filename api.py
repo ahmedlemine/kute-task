@@ -1,0 +1,100 @@
+from sqlmodel import Session, select, func, delete
+from sqlalchemy.exc import NoResultFound
+from uuid import UUID
+
+from db import get_engine
+from models import Task
+
+
+class TaskException(Exception):
+    pass
+
+
+class TaskNotFound(TaskException):
+    pass
+
+
+class InvalidTaskID(TaskException):
+    pass
+
+
+class MissingTitle(TaskException):
+    pass
+
+
+class InvalidTitle(TaskException):
+    pass
+
+
+class TaskAPI:
+    """API for the Single Task app"""
+
+    def __init__(self, db_url):
+        self.db_url = db_url
+        self._engine = get_engine(db_url)
+
+    def add_task(self, task: Task) -> UUID:
+        """Add a task and return the id of the task."""
+        if not task.title:
+            raise MissingTitle("a task must have a title.")
+
+        if not isinstance(task.title, str):
+            raise InvalidTitle("task title must be a string.")
+        with Session(self._engine) as session:
+            task_id = task.id
+            session.add(task)
+            session.commit()
+            return task_id
+
+    def list_by_last_deferred(self) -> list[Task]:
+        """List all tasks in database orderd by last_deferred first."""
+        with Session(self._engine) as session:
+            statement = select(Task).order_by(Task.last_deferred.asc())
+            results = session.exec(statement)
+            tasks = results.all()
+            return tasks
+
+    def get_task(self, id: UUID) -> Task:
+        """Retrieve a single task by id."""
+        if not isinstance(id, str):
+            raise InvalidTaskID("Task id must be a string.")
+        with Session(self._engine) as session:
+            statement = select(Task).where(Task.id == UUID(id))
+            try:
+                task = session.exec(statement).one()
+                return task
+            except NoResultFound as e:
+                raise TaskNotFound(f"[Error] No results found for the given id: {e}")
+                return None
+
+    def delete_task(self, id: UUID) -> None:
+        """Delete a single task by id."""
+        task = self.get_task(id)
+        if task is not None:
+            with Session(self._engine) as session:
+                try:
+                    session.delete(task)
+                    session.commit()
+                except NoResultFound as e:
+                    raise TaskNotFound(
+                        f"[Error] No results found for the given id: {e}"
+                    )
+        else:
+            raise TaskNotFound(
+                "[Error] can't defer task. No results found for the given id"
+            )
+
+    def count_tasks(self) -> int:
+        """Return the count of all tasks in the DB."""
+        with Session(self._engine) as session:
+            statement = select(func.count()).select_from(Task)
+            results = session.exec(statement)
+            task_count = results.one()
+            return task_count
+
+    def delete_all_tasks(self) -> None:
+        """Delete all tasks from the DB."""
+        with Session(self._engine) as session:
+            statement = delete(Task)
+            session.exec(statement)
+            session.commit()
