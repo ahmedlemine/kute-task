@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 base_dir = Path(__file__).resolve().parent.parent
-sqlite_file_name = "tasks_db.sqlite3"
+sqlite_file_name = ".tasks_db.sqlite3"
 db_path = base_dir / sqlite_file_name
 sqlite_url = f"sqlite:///{db_path}"
 
