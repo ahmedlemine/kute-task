@@ -1,5 +1,6 @@
 from sqlmodel import Session, select, func, delete
 from sqlalchemy.exc import NoResultFound
+from datetime import datetime
 from uuid import UUID
 
 from db import get_engine
@@ -46,6 +47,7 @@ class TaskAPI:
             session.commit()
             return task_id
 
+
     def list_by_last_deferred(self) -> list[Task]:
         """List all tasks in database orderd by last_deferred first."""
         with Session(self._engine) as session:
@@ -83,6 +85,28 @@ class TaskAPI:
             raise TaskNotFound(
                 "[Error] can't defer task. No results found for the given id"
             )
+
+    def defer_task(self, id: UUID) -> None:
+        """Defer a task by id."""
+        task = self.get_task(id)
+        if task is not None:
+            with Session(self._engine) as session:
+                task.last_deferred = datetime.now()
+                session.add(task)
+                session.commit()
+                session.refresh(task)
+        else:
+            raise TaskNotFound(
+                "[Error] can't defer task. No results found for the given id"
+            )
+
+    def get_next_task(self) -> Task:
+        """Retrieve next task in the queue."""
+        with Session(self._engine) as session:
+            statement = select(Task).order_by(Task.last_deferred.asc())
+            results = session.exec(statement)
+            next_task = results.first()
+            return next_task
 
     def count_tasks(self) -> int:
         """Return the count of all tasks in the DB."""
