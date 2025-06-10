@@ -108,6 +108,34 @@ class TaskAPI:
             next_task = results.first()
             return next_task
 
+    def complete_task(self, id: UUID) -> None:
+        """Mark a task (identified by its id) as completed."""
+        task = self.get_task(id)
+        if task is not None:
+            with Session(self._engine) as session:
+                task.is_completed = True
+                session.add(task)
+                session.commit()
+                session.refresh(task)
+        else:
+            raise TaskNotFound(
+                "[Error] can't complete task. No results found for the given id"
+            )
+
+    def incomplete_task(self, id: UUID) -> None:
+        """Mark a task (identified by its id) as incomplete."""
+        task = self.get_task(id)
+        if task is not None:
+            with Session(self._engine) as session:
+                task.is_completed = False
+                session.add(task)
+                session.commit()
+                session.refresh(task)
+        else:
+            raise TaskNotFound(
+                "[Error] can't complete task. No results found for the given id"
+            )
+
     def count_tasks(self) -> int:
         """Return the count of all tasks in the DB."""
         with Session(self._engine) as session:
