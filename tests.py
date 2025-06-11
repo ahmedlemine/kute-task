@@ -71,6 +71,19 @@ def test_list_incomplete_tasks(task_api):
     assert incmplt_task_id in incmplt_tasks and cmplt_task_id not in incmplt_tasks
 
 
+def test_list_completed_tasks(task_api):
+    """list_completed_tasks() should return all tasks that have is_completed=True
+    and not any tasks that has is_completed=False
+    """
+    t1 = Task(title="completed task", is_completed=True)
+    t2 = Task(title="incomplete task", is_completed=False)
+    cmplt_task_id = task_api.add_task(t1)
+    incmplt_task_id = task_api.add_task(t2)
+    tasks = task_api.list_completed_tasks()
+    cmplt_tasks = list(map(lambda t: t.id if t.is_completed else None, tasks))
+    assert cmplt_task_id in cmplt_tasks and incmplt_task_id not in cmplt_tasks
+
+
 def test_get_task(task_api):
     t = Task(title="test task")
     id = task_api.add_task(t)

@@ -56,20 +56,29 @@ class TaskAPI:
             return tasks
 
     def list_incomplet_by_last_deferred(self) -> list[Task]:
-        """List all tasks in database orderd by last_deferred first."""
+        """List only incomplete tasks orderd by last_deferred first."""
         with Session(self._engine) as session:
             statement = select(Task).where(Task.is_completed == False).order_by(Task.last_deferred.asc())
             results = session.exec(statement)
             tasks = results.all()
             return tasks
 
+    def list_completed_tasks(self) -> list[Task]:
+        """List only completed tasks."""
+        with Session(self._engine) as session:
+            statement = select(Task).where(Task.is_completed == True)
+            results = session.exec(statement)
+            tasks = results.all()
+            return tasks
+
     def list_incomplete_tasks(self) -> list[Task]:
-        """List all tasks in DB."""
+        """List only incompleted tasks."""
         with Session(self._engine) as session:
             statement = select(Task).where(Task.is_completed == False)
             results = session.exec(statement)
             tasks = results.all()
             return tasks
+
 
     def get_task(self, id: UUID) -> Task:
         """Retrieve a single task by id."""
