@@ -52,10 +52,23 @@ def test_add_task_invalid_title(task_api):
         assert isinstance(Task, t)
 
 
-def test_list_tasks(task_api):
+def test_list_all_tasks(task_api):
     t = Task(title="Task 1")
     new_task_id = task_api.add_task(t)
-    assert task_api.list_tasks()[-1].id == new_task_id
+    assert task_api.list_all_tasks()[-1].id == new_task_id
+
+
+def test_list_incomplete_tasks(task_api):
+    """list_incomplete_tasks() should return all tasks that have is_completed=False
+    and not any tasks that has is_completed=True
+    """
+    t1 = Task(title="incomplete task", is_completed=False)
+    t2 = Task(title="completed task", is_completed=True)
+    incmplt_task_id = task_api.add_task(t1)
+    cmplt_task_id = task_api.add_task(t2)
+    tasks = task_api.list_incomplete_tasks()
+    incmplt_tasks = list(map(lambda t: t.id if not t.is_completed else None, tasks))
+    assert incmplt_task_id in incmplt_tasks and cmplt_task_id not in incmplt_tasks
 
 
 def test_get_task(task_api):
@@ -130,7 +143,7 @@ def test_defer_task(task_api):
     t = Task(title="task to be deferred")
     added_task_id = task_api.add_task(t)
     task_api.defer_task(str(added_task_id))
-    assert task_api.list_by_last_deferred()[-1].id == added_task_id
+    assert task_api.list_incomplet_by_last_deferred()[-1].id == added_task_id
 
 
 def test_defer_task_with_invalid_id(task_api):
@@ -151,7 +164,7 @@ def get_next_task(task_api):
     task_api.add_task(t1)
     task_api.add_task(t2)
     next_task = task_api.get_next_task()
-    first_task_in_task_list = task_api.list_tasks()[0]
+    first_task_in_task_list = task_api.list_all_tasks()[0]
     assert next_task.id == first_task_in_task_list.id
 
 
@@ -174,7 +187,7 @@ def test_get_task_with_invalid_id(task_api):
         assert task_api.get_task(id).id == id
 
 
-def test_list_tasks_by_last_deferred(task_api):
+def test_list_incomplet_by_last_deferred(task_api):
     """Add a couple of tasks then defer a specfic one, which should
     push it to the bottom of the tasks if listed by last_deferred first
     (or most recent deferred last) then check if it indeed gets pushed to theme
@@ -186,7 +199,7 @@ def test_list_tasks_by_last_deferred(task_api):
     task_api.add_task(t1)
     task_api.add_task(t2)
     task_api.defer_task(str(deferred_task_id))
-    assert task_api.list_by_last_deferred()[-1].id == deferred_task_id
+    assert task_api.list_incomplet_by_last_deferred()[-1].id == deferred_task_id
 
 
 def test_complete_task(task_api):

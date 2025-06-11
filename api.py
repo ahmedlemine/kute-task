@@ -47,7 +47,7 @@ class TaskAPI:
             session.commit()
             return task_id
 
-    def list_tasks(self) -> list[Task]:
+    def list_all_tasks(self) -> list[Task]:
         """List all tasks in DB."""
         with Session(self._engine) as session:
             statement = select(Task)
@@ -55,10 +55,18 @@ class TaskAPI:
             tasks = results.all()
             return tasks
 
-    def list_by_last_deferred(self) -> list[Task]:
+    def list_incomplet_by_last_deferred(self) -> list[Task]:
         """List all tasks in database orderd by last_deferred first."""
         with Session(self._engine) as session:
-            statement = select(Task).order_by(Task.last_deferred.asc())
+            statement = select(Task).where(Task.is_completed == False).order_by(Task.last_deferred.asc())
+            results = session.exec(statement)
+            tasks = results.all()
+            return tasks
+
+    def list_incomplete_tasks(self) -> list[Task]:
+        """List all tasks in DB."""
+        with Session(self._engine) as session:
+            statement = select(Task).where(Task.is_completed == False)
             results = session.exec(statement)
             tasks = results.all()
             return tasks
