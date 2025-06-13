@@ -91,7 +91,6 @@ class TaskAPI:
                 return task
             except NoResultFound as e:
                 raise TaskNotFound(f"[Error] No results found for the given id: {e}")
-                return None
 
     def delete_task(self, id: UUID) -> None:
         """Delete a single task by id."""
