@@ -42,14 +42,12 @@ def test_add_task_missing_title(task_api):
     t = Task()
     with pytest.raises(MissingTitle):
         task_api.add_task(t)
-        assert isinstance(Task, t)
 
 
 def test_add_task_invalid_title(task_api):
     t = Task(title=123)
     with pytest.raises(InvalidTitle):
         task_api.add_task(t)
-        assert isinstance(Task, t)
 
 
 def test_list_all_tasks(task_api):
@@ -168,7 +166,7 @@ def test_defer_task_with_invalid_id(task_api):
         assert task_api.defer_task(id) is None
 
 
-def get_next_task(task_api):
+def test_get_next_task(task_api):
     """Get_next_task() should return the task at [0] index
     of the task list if ordered by created_at
     """
