@@ -3,7 +3,7 @@ from sqlalchemy import inspect
 from pathlib import Path
 
 
-base_dir = Path(__file__).resolve().parent.parent
+base_dir = Path(__file__)
 sqlite_file_name = ".tasks_db.sqlite3"
 db_path = base_dir / sqlite_file_name
 sqlite_url = f"sqlite:///{db_path}"
