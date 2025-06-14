@@ -44,6 +44,62 @@ def main(page: ft.Page):
     )
     page.drawer = drawer
 
+    # View / : showing only 1 task:
+    single_task_view = ft.Column(
+        [
+            ft.Row(
+                [
+                    ft.Text(
+                        value="What do you want to do now?",
+                        theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+            ft.Row(
+                [
+                    ft.Text(
+                        value="Orgainize my book shelves",
+                        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
+                        color=ft.Colors.INDIGO,
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+            ft.Row(
+                [
+                    ft.ElevatedButton(
+                        text="Do Now!",
+                        width=300,
+                        style=ft.ButtonStyle(
+                            padding=20,
+                            shape=ft.RoundedRectangleBorder(radius=2),
+                            bgcolor=ft.Colors.INDIGO,
+                            color=ft.Colors.WHITE,
+                            text_style=ft.TextStyle(size=24)
+                        ),
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+            ft.Row(
+                [
+                    ft.Button(
+                        "Defer, show me next",
+                        width=300,
+                        style=ft.ButtonStyle(
+                            padding=20,
+                            shape=ft.RoundedRectangleBorder(radius=2),
+                            bgcolor=ft.Colors.GREY_100,
+                            color=ft.Colors.GREY_400,
+                            text_style=ft.TextStyle(size=24)
+                        ),
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+        ]
+    )
 
     # used by route_change() to set the view matching the route
     page_views = {
@@ -55,6 +111,7 @@ def main(page: ft.Page):
                     title=ft.Text("Focus"),
                     bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 ),
+                single_task_view,
             ],
         ),
         "/list": ft.View(
@@ -97,5 +154,6 @@ def main(page: ft.Page):
 
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.scroll = ft.ScrollMode.ADAPTIVE
+
 
 ft.app(main, view=ft.AppView.WEB_BROWSER)
