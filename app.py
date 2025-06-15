@@ -96,7 +96,6 @@ def main(page: ft.Page):
     single_task_display_text = ft.Text(
         value=get_single_task_item().title if get_single_task_item() is not None else "no remaining tasks",
         theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-        color=ft.Colors.WHITE,
         max_lines=3,
         style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
     )
@@ -148,7 +147,7 @@ def main(page: ft.Page):
                         style=ft.ButtonStyle(
                             padding=20,
                             shape=ft.RoundedRectangleBorder(radius=2),
-                            bgcolor=ft.Colors.GREY_100,
+                            bgcolor=ft.Colors.GREY_300,
                             color=ft.Colors.GREY_600,
                             text_style=ft.TextStyle(size=24),
                         ),
@@ -165,7 +164,6 @@ def main(page: ft.Page):
         value=get_single_task_item().title if get_single_task_item() is not None else "no remaining tasks",
         max_lines=3,
         theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-        color=ft.Colors.WHITE,
         style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
     )
 
@@ -213,7 +211,7 @@ def main(page: ft.Page):
                         style=ft.ButtonStyle(
                             padding=20,
                             shape=ft.RoundedRectangleBorder(radius=2),
-                            bgcolor=ft.Colors.GREY_100,
+                            bgcolor=ft.Colors.GREY_300,
                             color=ft.Colors.GREY_600,
                             text_style=ft.TextStyle(size=24),
                         ),
