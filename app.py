@@ -11,7 +11,14 @@ def main(page: ft.Page):
     routes = ["/", "/focus", "/list", "/new"]
     api = TaskAPI(db_url=sqlite_url)
 
-    single_task_item = api.get_next_task()
+    def get_single_task_item():
+        next_task = api.get_next_task()
+        if next_task is not None:
+            return next_task
+        return None
+
+    def clear_current_task():
+        pass        
 
     # Side Drawer
     def handle_drwr_dismissal(e):
@@ -55,7 +62,42 @@ def main(page: ft.Page):
     )
     page.drawer = drawer
 
+    def defer_task(id):
+        api.defer_task(str(id))
+        single_task_display_text.value = get_single_task_item().title
+        page.update()
+
+    def set_current_focus_task(e):
+        current_task_display.value = get_single_task_item().title
+        page.go('/focus')
+
+    def update_single_task_item():
+        single_task_display_text.value = get_single_task_item().title
+        page.update()
+
+    def finish_current_task(e):
+        task_to_finish = get_single_task_item()
+        api.complete_task(str(task_to_finish.id))
+        single_task_display_text.value = get_single_task_item().title
+        print("========================CURRENT TASK================", get_single_task_item().is_completed)
+        page.add(ft.SnackBar(f"God Job. You've completed task: {task_to_finish.title}"))
+        page.go('/')
+        page.update()
+
+
+
+
+
+
     # View / : selecting a task to do now:
+    single_task_display_text = ft.Text(
+        value=get_single_task_item().title if get_single_task_item() is not None else "no remaining tasks",
+        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
+        color=ft.Colors.WHITE,
+        max_lines=3,
+        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+    )
+
     select_task_view = ft.Column(
         [
             ft.Row(
@@ -71,15 +113,7 @@ def main(page: ft.Page):
                 height=60
             ),
             ft.Row(
-                [
-                    ft.Text(
-                        value=single_task_item.title,
-                        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-                        color=ft.Colors.WHITE,
-                        max_lines=3,
-                        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-                    )
-                ],
+                [single_task_display_text],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             ft.Row(  # temp empty spacing
@@ -89,6 +123,7 @@ def main(page: ft.Page):
                 [
                     ft.ElevatedButton(
                         text="Do Now!",
+                        on_click=set_current_focus_task,
                         width=300,
                         style=ft.ButtonStyle(
                             padding=20,
@@ -105,6 +140,7 @@ def main(page: ft.Page):
                 [
                     ft.TextButton(
                         "Defer, show me the next",
+                        on_click=lambda _: defer_task(get_single_task_item().id),
                         width=300,
                         style=ft.ButtonStyle(
                             padding=20,
@@ -119,8 +155,33 @@ def main(page: ft.Page):
             ),
         ],
         alignment=ft.CrossAxisAlignment.STRETCH,
+        visible=get_single_task_item() is not None
     )
     # View /focus : focusing on only 1 task that's being done now:
+    current_task_display = ft.Text(
+        value=get_single_task_item().title if get_single_task_item() is not None else "no remaining tasks",
+        max_lines=3,
+        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
+        color=ft.Colors.WHITE,
+        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+    )
+
+    empty_tasks_home_view = ft.Column(
+        [
+            ft.Row(
+                [
+                    ft.Text(
+                        value="No unfinished tasks to select from. Please add somet tasks to start.",
+                        theme_style=ft.TextThemeStyle.BODY_LARGE,
+                    )
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+        ],
+        alignment=ft.CrossAxisAlignment.STRETCH,
+        visible=get_single_task_item() is None,
+    )
+
     focus_mode_view = ft.Column(
         [
             ft.Row(
@@ -134,15 +195,7 @@ def main(page: ft.Page):
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             ft.Row(
-                [
-                    ft.Text(
-                        value=single_task_item.title,
-                        max_lines=3,
-                        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-                        color=ft.Colors.WHITE,
-                        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-                    )
-                ],
+                [current_task_display],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             ft.Row(  # temp empty spacing
@@ -152,6 +205,7 @@ def main(page: ft.Page):
                 [
                     ft.TextButton(
                         "Done",
+                        on_click=finish_current_task,
                         width=300,
                         style=ft.ButtonStyle(
                             padding=20,
@@ -178,6 +232,7 @@ def main(page: ft.Page):
                     bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 ),
                 select_task_view,
+                empty_tasks_home_view,
             ],
         ),
         "/focus": ft.View(
