@@ -1,17 +1,21 @@
 import flet as ft
-
+from api import TaskAPI
+from db import sqlite_url
+from models import Task
 
 def main(page: ft.Page):
     page.title = "Kute Task"
 
     # must be in the same order as page_views routes
     routes = ["/", "/list", "/new"]
+    api = TaskAPI(db_url=sqlite_url)
 
+    single_task_item = api.get_next_task()
     # Side Drawer
-    def handle_dismissal(e):
+    def handle_drwr_dismissal(e):
         pass
 
-    def handle_change(e):
+    def handle_drwr_change(e):
         page.go(routes[e.control.selected_index])
         page.close(drawer)
 
@@ -20,8 +24,8 @@ def main(page: ft.Page):
         page.drawer.update()
 
     drawer = ft.NavigationDrawer(
-        on_dismiss=handle_dismissal,
-        on_change=handle_change,
+        on_dismiss=handle_drwr_dismissal,
+        on_change=handle_drwr_change,
         controls=[
             ft.Container(height=12),
             ft.NavigationDrawerDestination(
@@ -51,20 +55,26 @@ def main(page: ft.Page):
                 [
                     ft.Text(
                         value="What do you want to do now?",
-                        theme_style=ft.TextThemeStyle.HEADLINE_MEDIUM,
+                        theme_style=ft.TextThemeStyle.HEADLINE_SMALL,
                     )
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
+            ft.Row(  # temp empty spacing
+                height=60
+            ),
             ft.Row(
                 [
                     ft.Text(
-                        value="Orgainize my book shelves",
+                        value=single_task_item.title,
                         theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-                        color=ft.Colors.INDIGO,
+                        color=ft.Colors.WHITE,
                     )
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
+            ),
+            ft.Row(  # temp empty spacing
+                height=10
             ),
             ft.Row(
                 [
@@ -76,7 +86,7 @@ def main(page: ft.Page):
                             shape=ft.RoundedRectangleBorder(radius=2),
                             bgcolor=ft.Colors.INDIGO,
                             color=ft.Colors.WHITE,
-                            text_style=ft.TextStyle(size=24)
+                            text_style=ft.TextStyle(size=24),
                         ),
                     ),
                 ],
@@ -84,21 +94,22 @@ def main(page: ft.Page):
             ),
             ft.Row(
                 [
-                    ft.Button(
-                        "Defer, show me next",
+                    ft.TextButton(
+                        "Defer, show me the next",
                         width=300,
                         style=ft.ButtonStyle(
                             padding=20,
                             shape=ft.RoundedRectangleBorder(radius=2),
                             bgcolor=ft.Colors.GREY_100,
-                            color=ft.Colors.GREY_400,
-                            text_style=ft.TextStyle(size=24)
+                            color=ft.Colors.GREY_600,
+                            text_style=ft.TextStyle(size=24),
                         ),
                     ),
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
-        ]
+        ],
+        alignment=ft.CrossAxisAlignment.STRETCH,
     )
 
     # used by route_change() to set the view matching the route
@@ -152,7 +163,17 @@ def main(page: ft.Page):
     page.on_view_pop = view_pop
     page.go(page.route)
 
+    # window
+    page.window.max_height = 960
+    page.window.max_width = 400
+    page.window.min_height = 600
+    page.window.min_width = 360
+    page.window.width = 414
+    page.window.height = 760
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment = ft.CrossAxisAlignment.CENTER
+    
+
     page.scroll = ft.ScrollMode.ADAPTIVE
 
 
