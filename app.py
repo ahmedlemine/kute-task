@@ -78,9 +78,12 @@ def main(page: ft.Page):
     def finish_current_task(e):
         task_to_finish = get_single_task_item()
         api.complete_task(str(task_to_finish.id))
-        single_task_display_text.value = get_single_task_item().title
-        print("========================CURRENT TASK================", get_single_task_item().is_completed)
         page.add(ft.SnackBar(f"God Job. You've completed task: {task_to_finish.title}"))
+        if get_single_task_item() is not None:
+            single_task_display_text.value = get_single_task_item().title
+        else:
+            select_task_view.visible=False
+            empty_tasks_home_view.visible = True
         page.go('/')
         page.update()
 
