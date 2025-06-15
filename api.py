@@ -126,9 +126,11 @@ class TaskAPI:
     def get_next_task(self) -> Task:
         """Retrieve next task in the queue."""
         with Session(self._engine) as session:
-            statement = select(Task).order_by(Task.last_deferred.asc())
+            statement = select(Task).where(Task.is_completed == False).order_by(Task.last_deferred.asc())
             results = session.exec(statement)
+            print("+++++++++++++RESULTS FROM NEXT TASK+++++++++++", results)
             next_task = results.first()
+            print("+++++++++++++NEXT TASK+++++++++++", next_task)
             return next_task
 
     def complete_task(self, id: UUID) -> None:
