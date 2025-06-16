@@ -4,12 +4,53 @@ from db import sqlite_url
 from models import Task
 
 
+class Drawer(ft.NavigationDrawer):
+    def __init__(self, handle_drwr_change):
+        super().__init__()
+        self.on_change = handle_drwr_change
+        self.controls = [
+                ft.Container(height=12),
+                ft.NavigationDrawerDestination(
+                    label="Choose Task",
+                    icon=ft.Icons.EXPLORE,
+                    selected_icon=ft.Icon(ft.Icons.EXPLORE_OUTLINED),
+                ),
+                ft.Divider(thickness=2),
+                ft.NavigationDrawerDestination(
+                    label="Current Task",
+                    icon=ft.Icons.WATCH,
+                    selected_icon=ft.Icon(ft.Icons.WATCH_OUTLINED),
+                ),
+                ft.NavigationDrawerDestination(
+                    label="List Tasks",
+                    icon=ft.Icon(ft.Icons.LIST_OUTLINED),
+                    selected_icon=ft.Icons.LIST,
+                ),
+                ft.NavigationDrawerDestination(
+                    label="Add Task",
+                    icon=ft.Icon(ft.Icons.CREATE_OUTLINED),
+                    selected_icon=ft.Icons.CREATE,
+                ),
+            ]
+
+
 def main(page: ft.Page):
     page.title = "Kute Task"
+    api = TaskAPI(db_url=sqlite_url)
+
 
     # must be in the same order as page_views routes
     routes = ["/", "/focus", "/list", "/new"]
-    api = TaskAPI(db_url=sqlite_url)
+
+
+    def handle_drwr_change(e):
+        page.go(routes[e.control.selected_index])
+        e.open = False
+
+    drawer = Drawer(handle_drwr_change)
+    page.drawer = drawer
+    page.update()
+
 
     def get_single_task_item():
         next_task = api.get_next_task()
@@ -17,50 +58,6 @@ def main(page: ft.Page):
             return next_task
         return None
 
-    def clear_current_task():
-        pass
-
-    # Side Drawer
-    def handle_drwr_dismissal(e):
-        pass
-
-    def handle_drwr_change(e):
-        page.go(routes[e.control.selected_index])
-        page.close(drawer)
-
-    def show_drawer(e):
-        page.drawer.open = True
-        page.drawer.update()
-
-    drawer = ft.NavigationDrawer(
-        on_dismiss=handle_drwr_dismissal,
-        on_change=handle_drwr_change,
-        controls=[
-            ft.Container(height=12),
-            ft.NavigationDrawerDestination(
-                label="Choose Task",
-                icon=ft.Icons.EXPLORE,
-                selected_icon=ft.Icon(ft.Icons.EXPLORE_OUTLINED),
-            ),
-            ft.Divider(thickness=2),
-            ft.NavigationDrawerDestination(
-                label="Current Task",
-                icon=ft.Icons.WATCH,
-                selected_icon=ft.Icon(ft.Icons.WATCH_OUTLINED),
-            ),
-            ft.NavigationDrawerDestination(
-                label="List Tasks",
-                icon=ft.Icon(ft.Icons.LIST_OUTLINED),
-                selected_icon=ft.Icons.LIST,
-            ),
-            ft.NavigationDrawerDestination(
-                label="Add Task",
-                icon=ft.Icon(ft.Icons.CREATE_OUTLINED),
-                selected_icon=ft.Icons.CREATE,
-            ),
-        ],
-    )
-    page.drawer = drawer
 
     def defer_task(id):
         api.defer_task(str(id))
@@ -294,9 +291,9 @@ def main(page: ft.Page):
 
     # window
     page.window.max_height = 960
-    page.window.max_width = 400
+    page.window.max_width = 600
     page.window.min_height = 600
-    page.window.min_width = 360
+    page.window.min_width = 400
     page.window.width = 414
     page.window.height = 760
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
