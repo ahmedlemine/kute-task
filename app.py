@@ -212,6 +212,7 @@ def main(page: ft.Page):
                         "Done",
                         on_click=finish_current_task,
                         width=300,
+                        visible=get_single_task_item() is not None,
                         style=ft.ButtonStyle(
                             padding=20,
                             shape=ft.RoundedRectangleBorder(radius=2),
