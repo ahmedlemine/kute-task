@@ -1,9 +1,11 @@
 from sqlmodel import SQLModel, create_engine
 from sqlalchemy import inspect
 from pathlib import Path
+from platformdirs import user_data_path
 
-
-base_dir = Path(__file__).resolve().parent
+appname = "Kute Task"
+appauthor = "Kute Apps"
+base_dir = Path(user_data_path(appname, appauthor))
 
 sqlite_file_name = ".tasks_db.sqlite3"
 db_path = base_dir / sqlite_file_name
