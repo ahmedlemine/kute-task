@@ -27,8 +27,8 @@ def get_engine(db_url: str = sqlite_url):
     """Creates DB base_dir, create the SQLModel engine
     then checks if database & table(s) exist, if not creates them
     """
+    base_dir.mkdir(exist_ok=True)
     try:
-        base_dir.mkdir(exist_ok=True)
         engine = create_engine(db_url, echo=True)
         insp = inspect(engine)
         db_table_exists = insp.has_table("task")
