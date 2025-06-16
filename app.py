@@ -18,7 +18,7 @@ def main(page: ft.Page):
         return None
 
     def clear_current_task():
-        pass        
+        pass
 
     # Side Drawer
     def handle_drwr_dismissal(e):
@@ -69,7 +69,7 @@ def main(page: ft.Page):
 
     def set_current_focus_task(e):
         current_task_display.value = get_single_task_item().title
-        page.go('/focus')
+        page.go("/focus")
 
     def update_single_task_item():
         single_task_display_text.value = get_single_task_item().title
@@ -82,21 +82,20 @@ def main(page: ft.Page):
         if get_single_task_item() is not None:
             single_task_display_text.value = get_single_task_item().title
         else:
-            select_task_view.visible=False
+            select_task_view.visible = False
             empty_tasks_home_view.visible = True
-        page.go('/')
+        page.go("/")
         page.update()
-
-
-
-
-
 
     # View / : selecting a task to do now:
     single_task_display_text = ft.Text(
-        value=get_single_task_item().title if get_single_task_item() is not None else "no remaining tasks",
+        value=get_single_task_item().title
+        if get_single_task_item() is not None
+        else "no remaining tasks",
         theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
         max_lines=3,
+        width=320,
+        text_align=ft.TextAlign.CENTER,
         style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
     )
 
@@ -157,12 +156,16 @@ def main(page: ft.Page):
             ),
         ],
         alignment=ft.CrossAxisAlignment.STRETCH,
-        visible=get_single_task_item() is not None
+        visible=get_single_task_item() is not None,
     )
     # View /focus : focusing on only 1 task that's being done now:
     current_task_display = ft.Text(
-        value=get_single_task_item().title if get_single_task_item() is not None else "no remaining tasks",
-        max_lines=3,
+        value=get_single_task_item().title
+        if get_single_task_item() is not None
+        else "no remaining tasks",
+        max_lines=5,
+        width=320,
+        text_align=ft.TextAlign.CENTER,
         theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
         style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
     )
@@ -174,6 +177,10 @@ def main(page: ft.Page):
                     ft.Text(
                         value="No unfinished tasks to select from. Please add somet tasks to start.",
                         theme_style=ft.TextThemeStyle.BODY_LARGE,
+                        max_lines=5,
+                        width=320,
+                        text_align=ft.TextAlign.CENTER,
+                        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
                     )
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
