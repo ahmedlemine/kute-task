@@ -1,8 +1,7 @@
 import flet as ft
 from api import TaskAPI
 from db import sqlite_url
-from models import Task
-
+from task_list_view import ListTasksView
 
 class Drawer(ft.NavigationDrawer):
     def __init__(self, handle_drwr_change):
@@ -227,6 +226,10 @@ def main(page: ft.Page):
         ],
         alignment=ft.CrossAxisAlignment.STRETCH,
     )
+
+    # Task list view:
+    task_list_control = ListTasksView()
+    task_list_view = ft.Row([task_list_control])
     # used by route_change() to set the view matching the route
     page_views = {
         "/": ft.View(
@@ -260,7 +263,7 @@ def main(page: ft.Page):
                     title=ft.Text("Task List"),
                     bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 ),
-                ft.ElevatedButton("Back", on_click=lambda _: page.go("/")),
+                task_list_view,
             ],
         ),
         "/new": ft.View(
@@ -291,9 +294,9 @@ def main(page: ft.Page):
     page.go(page.route)
 
     # window
-    page.window.min_width = 360
+    page.window.min_width = 414
     page.window.min_height = 760
-    page.window.width = 360
+    page.window.width = 414
     page.window.height = 760
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.CrossAxisAlignment.CENTER
