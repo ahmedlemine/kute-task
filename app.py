@@ -291,11 +291,9 @@ def main(page: ft.Page):
     page.go(page.route)
 
     # window
-    page.window.max_height = 960
-    page.window.max_width = 600
-    page.window.min_height = 600
-    page.window.min_width = 400
-    page.window.width = 414
+    page.window.min_width = 360
+    page.window.min_height = 760
+    page.window.width = 360
     page.window.height = 760
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.CrossAxisAlignment.CENTER
