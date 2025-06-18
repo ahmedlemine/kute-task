@@ -58,7 +58,11 @@ class TaskAPI:
     def list_incomplet_by_last_deferred(self) -> list[Task]:
         """List only incomplete tasks orderd by last_deferred first."""
         with Session(self._engine) as session:
-            statement = select(Task).where(Task.is_completed == False).order_by(Task.last_deferred.asc())
+            statement = (
+                select(Task)
+                .where(Task.is_completed == False)
+                .order_by(Task.last_deferred.asc())
+            )
             results = session.exec(statement)
             tasks = results.all()
             return tasks
@@ -78,7 +82,6 @@ class TaskAPI:
             results = session.exec(statement)
             tasks = results.all()
             return tasks
-
 
     def get_task(self, id: UUID) -> Task:
         """Retrieve a single task by id."""
@@ -126,34 +129,25 @@ class TaskAPI:
     def get_next_task(self) -> Task:
         """Retrieve next task in the queue."""
         with Session(self._engine) as session:
-            statement = select(Task).where(Task.is_completed == False).order_by(Task.last_deferred.asc())
+            statement = (
+                select(Task)
+                .where(Task.is_completed == False)
+                .order_by(Task.last_deferred.asc())
+            )
             results = session.exec(statement)
             next_task = results.first()
             return next_task
 
-    def complete_task(self, id: UUID) -> None:
-        """Mark a task (identified by its id) as completed."""
+    def toggle_complete(self, id: UUID) -> Task:
+        """Toggle a task's is_completed"""
         task = self.get_task(id)
         if task is not None:
             with Session(self._engine) as session:
-                task.is_completed = True
+                task.is_completed = not task.is_completed
                 session.add(task)
                 session.commit()
                 session.refresh(task)
-        else:
-            raise TaskNotFound(
-                "[Error] can't complete task. No results found for the given id"
-            )
-
-    def incomplete_task(self, id: UUID) -> None:
-        """Mark a task (identified by its id) as incomplete."""
-        task = self.get_task(id)
-        if task is not None:
-            with Session(self._engine) as session:
-                task.is_completed = False
-                session.add(task)
-                session.commit()
-                session.refresh(task)
+                return task
         else:
             raise TaskNotFound(
                 "[Error] can't complete task. No results found for the given id"

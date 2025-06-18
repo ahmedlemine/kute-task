@@ -213,31 +213,23 @@ def test_list_incomplet_by_last_deferred(task_api):
     assert task_api.list_incomplet_by_last_deferred()[-1].id == deferred_task_id
 
 
-def test_complete_task(task_api):
-    """Test toggle_complete_task with is_completed=False"""
-    t = Task(title="Task to complete", is_completed=False)
+def test_toggle_task_from_false(task_api):
+    """Test toggling a task.is_completed from False to True"""
+    t = Task(title="Task to toggle", is_completed=False)
     new_task_id = str(task_api.add_task(t))
-    task_api.complete_task(new_task_id)
-    completed_task = task_api.get_task(new_task_id)
+    completed_task = task_api.toggle_complete(new_task_id)
     assert completed_task.is_completed is True
 
 
-def test_complete_non_existent_task(task_api):
-    id = uuid4()
-    with pytest.raises(TaskNotFound):
-        assert task_api.complete_task(str(id)) is None
-
-
-def test_incomplete_task(task_api):
-    """Test toggle_complete_task with is_completed=True"""
-    t = Task(title="Task to incomplete", is_completed=True)
+def test_toggle_task_from_true(task_api):
+    """Test toggling a task.is_completed from True to False"""
+    t = Task(title="Task to toggle", is_completed=True)
     new_task_id = str(task_api.add_task(t))
-    task_api.incomplete_task(new_task_id)
-    completed_task = task_api.get_task(new_task_id)
+    completed_task = task_api.toggle_complete(new_task_id)
     assert completed_task.is_completed is False
 
-
-def test_incomplete_non_existent_task(task_api):
-    id = uuid4()
+def test_toggle_non_existent_task(task_api):
+    """Test toggling a non-existent task"""
+    id = str(uuid4())
     with pytest.raises(TaskNotFound):
-        assert task_api.incomplete_task(str(id)) is None
+        assert task_api.toggle_complete(id).id == id

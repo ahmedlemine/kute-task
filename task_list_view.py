@@ -155,14 +155,9 @@ class ListTasksView(ft.Column):
             self.update()
 
     def task_status_change(self, task):
-        if task.is_completed:
-            api.incomplete_task(str(task.id))
-            task.is_completed = False
-            self.update()
-        elif not task.is_completed:
-            api.complete_task(str(task.id))
-            task.is_completed = True
-            self.update()
+        updated_task = api.toggle_complete(str(task.id))
+        task.is_completed = updated_task.is_completed
+        self.update()
 
     def task_delete(self, task_item, task_id):
         api.delete_task(str(task_id))
