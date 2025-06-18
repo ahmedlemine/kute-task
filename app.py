@@ -1,8 +1,7 @@
 import flet as ft
 from api import TaskAPI
 from db import sqlite_url
-from task_list_view import ListTasksView
-
+from task_list_view import ListTasksView, TaskControl
 class Drawer(ft.NavigationDrawer):
     def __init__(self, handle_drwr_change):
         super().__init__()
@@ -73,8 +72,8 @@ def main(page: ft.Page):
 
     def finish_current_task(e):
         task_to_finish = get_single_task_item()
-        api.complete_task(str(task_to_finish.id))
-        page.add(ft.SnackBar(f"God Job. You've completed task: {task_to_finish.title}"))
+        api.toggle_complete(str(task_to_finish.id))
+        page.add(ft.SnackBar(f"Good Job. You've completed task: {task_to_finish.title}"))
         if get_single_task_item() is not None:
             single_task_display_text.value = get_single_task_item().title
         else:
