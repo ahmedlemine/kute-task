@@ -7,10 +7,11 @@ api = TaskAPI(sqlite_url)
 
 
 class TaskControl(ft.Column):
-    def __init__(self, task, task_status_change, task_delete):
+    def __init__(self, task, task_status_change, task_title_update, task_delete):
         super().__init__()
         self.task = task
         self.task_status_change = task_status_change
+        self.task_title_update = task_title_update
         self.task_delete = task_delete
 
         self.display_task = ft.Checkbox(
@@ -45,7 +46,7 @@ class TaskControl(ft.Column):
             ],
         )
 
-        # edit view of echa task A task is either in display or edit view
+        # edit view of echa task. A task is either in display or edit view
         self.edit_view = ft.Row(
             visible=False,
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -70,9 +71,10 @@ class TaskControl(ft.Column):
 
     def save_clicked(self, e):
         self.display_task.label = self.edit_name.value
+        self.task_title_update(self.task, self.display_task.label)
         self.display_view.visible = True
         self.edit_view.visible = False
-        self.update()
+        # self.update()
 
     def status_changed(self, e):
         self.completed = self.display_task.value
@@ -147,7 +149,7 @@ class ListTasksView(ft.Column):
             added_task_id = api.add_task(task)
             added_task = api.get_task(str(added_task_id))
             task_control = TaskControl(
-                added_task, self.task_status_change, self.task_delete
+                added_task, self.task_status_change, self.task_title_update, self.task_delete
             )
             self.tasks.controls.append(task_control)
             self.new_task.value = ""
@@ -157,6 +159,11 @@ class ListTasksView(ft.Column):
     def task_status_change(self, task):
         updated_task = api.toggle_complete(str(task.id))
         task.is_completed = updated_task.is_completed
+        self.update()
+    
+    def task_title_update(self, task, title):
+        updated_task = api.update_task_title(str(task.id), title)
+        task.title = updated_task.title
         self.update()
 
     def task_delete(self, task_item, task_id):
@@ -175,7 +182,7 @@ class ListTasksView(ft.Column):
     def build(self):
         if not len(self.tasks.controls):
             for task in self.task_list_from_db:
-                task_item = TaskControl(task, self.task_status_change, self.task_delete)
+                task_item = TaskControl(task, self.task_status_change, self.task_title_update, self.task_delete)
                 self.tasks.controls.append(task_item)
 
     def before_update(self):
