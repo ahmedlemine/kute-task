@@ -95,6 +95,19 @@ def test_get_non_existent_task(task_api):
     with pytest.raises(TaskNotFound):
         assert task_api.get_task(id) == id
 
+def test_update_task_title(task_api):
+    t = Task(title="Title to be updated")
+    old_title = t.title
+    old_task_id = task_api.add_task(t)
+    updated_task = task_api.update_task_title(str(old_task_id), "new title")
+    assert updated_task.title != old_title
+
+def test_update_task_missing_title(task_api):
+    t = Task(title="Title to be updated")
+    id = task_api.add_task(t)
+    with pytest.raises(MissingTitle):
+        task_api.update_task_title(str(id), None)
+
 
 def test_delete_a_single_task(task_api):
     """Deleting a task and then attempting to

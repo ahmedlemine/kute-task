@@ -95,6 +95,24 @@ class TaskAPI:
             except NoResultFound as e:
                 raise TaskNotFound(f"[Error] No results found for the given id: {e}")
 
+    def update_task_title(self, id: UUID, title: str) -> Task:
+        """Update title for a task identified by its id"""
+        if not title:
+            raise MissingTitle("title can not be empty")
+        
+        task = self.get_task(id)
+        if task is not None:
+            with Session(self._engine) as session:
+                task.title = title
+                session.add(task)
+                session.commit()
+                session.refresh(task)
+                return task
+        else:
+            raise TaskNotFound(
+                "[Error] can't defer task. No results found for the given id"
+            )
+
     def delete_task(self, id: UUID) -> None:
         """Delete a single task by id."""
         task = self.get_task(id)
