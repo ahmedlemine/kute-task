@@ -9,13 +9,14 @@ api = TaskAPI(sqlite_url)
 class TaskControl(ft.Column):
     def __init__(self, task, task_status_change, task_delete):
         super().__init__()
-        self.task_title = task.title
-        self.is_completed = task.is_completed
+        self.task = task
         self.task_status_change = task_status_change
         self.task_delete = task_delete
 
         self.display_task = ft.Checkbox(
-            value=False, label=self.task_title, on_change=self.status_changed
+            value=self.task.is_completed,
+            label=self.task.title,
+            on_change=self.status_changed,
         )
         # input box for edting task's name
         self.edit_name = ft.TextField(expand=1)
@@ -75,14 +76,13 @@ class TaskControl(ft.Column):
 
     def status_changed(self, e):
         self.completed = self.display_task.value
-        self.task_status_change(self)
+        self.task_status_change(self.task)
 
     def delete_clicked(self, e):
         self.task_delete(self, e)
 
 
 class ListTasksView(ft.Column):
-    # application's root control is a Column containing all other controls
     def __init__(self):
         super().__init__()
         self.new_task = ft.TextField(
@@ -135,7 +135,7 @@ class ListTasksView(ft.Column):
         ]
 
     def get_task_list_from_db(self):
-        task_list_from_db = api.list_incomplet_by_last_deferred()
+        task_list_from_db = api.list_all_tasks()
         if len(task_list_from_db) > 0:
             return task_list_from_db
         else:
@@ -144,15 +144,25 @@ class ListTasksView(ft.Column):
     def add_clicked(self, e):
         if self.new_task.value:
             task = Task(title=self.new_task.value)
-            task_item = TaskControl(task, self.task_status_change, self.task_delete)
-            api.add_task(task)
-            self.tasks.controls.append(task_item)
+            added_task_id = api.add_task(task)
+            added_task = api.get_task(str(added_task_id))
+            task_control = TaskControl(
+                added_task, self.task_status_change, self.task_delete
+            )
+            self.tasks.controls.append(task_control)
             self.new_task.value = ""
             self.new_task.focus()
             self.update()
 
     def task_status_change(self, task):
-        self.update()
+        if task.is_completed:
+            api.incomplete_task(str(task.id))
+            task.is_completed = False
+            self.update()
+        elif not task.is_completed:
+            api.complete_task(str(task.id))
+            task.is_completed = True
+            self.update()
 
     def task_delete(self, task_item, task_id):
         api.delete_task(str(task_id))
@@ -163,9 +173,9 @@ class ListTasksView(ft.Column):
         self.update()
 
     def clear_clicked(self, e):
-        for task in self.tasks.controls[:]:
-            if task.completed:
-                self.task_delete(task)
+        for t in self.tasks.controls[:]:
+            if t.task.is_completed:
+                self.task_delete(t, t.task.id)
 
     def build(self):
         if not len(self.tasks.controls):
@@ -177,12 +187,12 @@ class ListTasksView(ft.Column):
         self.task_list_from_db = self.get_task_list_from_db()
         status = self.filter.tabs[self.filter.selected_index].text
         count = 0
-        for task in self.tasks.controls:
-            task.visible = (
+        for t in self.tasks.controls:
+            t.visible = (
                 status == "all"
-                or (status == "active" and task.is_completed == False)
-                or (status == "completed" and task.is_completed)
+                or (status == "active" and t.task.is_completed == False)
+                or (status == "completed" and t.task.is_completed)
             )
-            if not task.is_completed:
+            if not t.task.is_completed:
                 count += 1
         self.items_left.value = f"{count} active item(s) left"
