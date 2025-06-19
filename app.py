@@ -1,35 +1,35 @@
 import flet as ft
 from api import TaskAPI
 from db import sqlite_url
-from task_list_view import ListTasksView, TaskControl
+from task_list_view import ListTasksView
 class Drawer(ft.NavigationDrawer):
     def __init__(self, handle_drwr_change):
         super().__init__()
         self.on_change = handle_drwr_change
         self.controls = [
-                ft.Container(height=12),
-                ft.NavigationDrawerDestination(
-                    label="Choose Task",
-                    icon=ft.Icons.EXPLORE,
-                    selected_icon=ft.Icon(ft.Icons.EXPLORE_OUTLINED),
-                ),
-                ft.Divider(thickness=2),
-                ft.NavigationDrawerDestination(
-                    label="Current Task",
-                    icon=ft.Icons.WATCH,
-                    selected_icon=ft.Icon(ft.Icons.WATCH_OUTLINED),
-                ),
-                ft.NavigationDrawerDestination(
-                    label="List Tasks",
-                    icon=ft.Icon(ft.Icons.LIST_OUTLINED),
-                    selected_icon=ft.Icons.LIST,
-                ),
-                ft.NavigationDrawerDestination(
-                    label="Add Task",
-                    icon=ft.Icon(ft.Icons.CREATE_OUTLINED),
-                    selected_icon=ft.Icons.CREATE,
-                ),
-            ]
+            ft.Container(height=12),
+            ft.NavigationDrawerDestination(
+                label="Choose Task",
+                icon=ft.Icons.EXPLORE_OUTLINED,
+                selected_icon=ft.Icon(ft.Icons.EXPLORE),
+            ),
+            ft.NavigationDrawerDestination(
+                label="Current Task",
+                icon=ft.Icons.WATCH_LATER_OUTLINED,
+                selected_icon=ft.Icon(ft.Icons.WATCH_LATER),
+            ),
+            ft.NavigationDrawerDestination(
+                label="List Tasks",
+                icon=ft.Icon(ft.Icons.LIST),
+                selected_icon=ft.Icons.LIST_OUTLINED,
+            ),
+            ft.Divider(thickness=2),
+            ft.NavigationDrawerDestination(
+                label="Add Task",
+                icon=ft.Icon(ft.Icons.CREATE_OUTLINED),
+                selected_icon=ft.Icons.CREATE,
+            ),
+        ]
 
 
 def main(page: ft.Page):
@@ -100,7 +100,8 @@ def main(page: ft.Page):
                 [
                     ft.Text(
                         value="What do you want to do now?",
-                        theme_style=ft.TextThemeStyle.HEADLINE_SMALL,
+                        theme_style=ft.TextThemeStyle.BODY_LARGE,
+                        color=ft.Colors.GREY_500
                     )
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -118,12 +119,11 @@ def main(page: ft.Page):
             ft.Row(
                 [
                     ft.ElevatedButton(
-                        text="Do Now!",
+                        text="Do Now",
                         on_click=set_current_focus_task,
-                        width=300,
+                        width=200,
                         style=ft.ButtonStyle(
                             padding=20,
-                            shape=ft.RoundedRectangleBorder(radius=2),
                             bgcolor=ft.Colors.INDIGO,
                             color=ft.Colors.WHITE,
                             text_style=ft.TextStyle(size=24),
@@ -134,15 +134,12 @@ def main(page: ft.Page):
             ),
             ft.Row(
                 [
-                    ft.TextButton(
-                        "Defer, show me the next",
+                    ft.ElevatedButton(
+                        "Defer",
                         on_click=lambda _: defer_task(get_single_task_item().id),
-                        width=300,
+                        width=200,
                         style=ft.ButtonStyle(
                             padding=20,
-                            shape=ft.RoundedRectangleBorder(radius=2),
-                            bgcolor=ft.Colors.GREY_300,
-                            color=ft.Colors.GREY_600,
                             text_style=ft.TextStyle(size=24),
                         ),
                     ),
@@ -201,21 +198,18 @@ def main(page: ft.Page):
                 [current_task_display],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
-            ft.Row(  # temp empty spacing
+            ft.Row(
                 height=200
             ),
             ft.Row(
                 [
-                    ft.TextButton(
+                    ft.ElevatedButton(
                         "Done",
                         on_click=finish_current_task,
-                        width=300,
+                        width=200,
                         visible=get_single_task_item() is not None,
                         style=ft.ButtonStyle(
                             padding=20,
-                            shape=ft.RoundedRectangleBorder(radius=2),
-                            bgcolor=ft.Colors.GREY_300,
-                            color=ft.Colors.GREY_600,
                             text_style=ft.TextStyle(size=24),
                         ),
                     ),
@@ -301,6 +295,9 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.CrossAxisAlignment.CENTER
 
     page.scroll = ft.ScrollMode.ADAPTIVE
+
+    page.theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
+    page.dark_theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
 
 
 ft.app(main, view=ft.AppView.WEB_BROWSER)
