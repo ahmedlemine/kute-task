@@ -2,6 +2,8 @@ import flet as ft
 from api import TaskAPI
 from db import sqlite_url
 from task_list_view import ListTasksView
+
+
 class Drawer(ft.NavigationDrawer):
     def __init__(self, handle_drwr_change):
         super().__init__()
@@ -25,21 +27,33 @@ class Drawer(ft.NavigationDrawer):
             ),
             ft.Divider(thickness=2),
             ft.NavigationDrawerDestination(
-                label="Add Task",
-                icon=ft.Icon(ft.Icons.CREATE_OUTLINED),
-                selected_icon=ft.Icons.CREATE,
+                label="Settings",
+                icon=ft.Icon(ft.Icons.SETTINGS_OUTLINED),
+                selected_icon=ft.Icons.SETTINGS,
             ),
         ]
 
 
 def main(page: ft.Page):
     page.title = "Kute Task"
+    page.theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
+    page.dark_theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
+    page.theme_mode = ft.ThemeMode.LIGHT
+
+    # window
+    page.window.min_width = 414
+    page.window.min_height = 760
+    page.window.width = 414
+    page.window.height = 760
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment = ft.CrossAxisAlignment.CENTER
+
+    page.scroll = ft.ScrollMode.ADAPTIVE
+
     api = TaskAPI(db_url=sqlite_url)
 
-
     # must be in the same order as page_views routes
-    routes = ["/", "/focus", "/list", "/new"]
-
+    routes = ["/", "/focus", "/list", "/settings"]
 
     def handle_drwr_change(e):
         page.go(routes[e.control.selected_index])
@@ -49,13 +63,11 @@ def main(page: ft.Page):
     page.drawer = drawer
     page.update()
 
-
     def get_single_task_item():
         next_task = api.get_next_task()
         if next_task is not None:
             return next_task
         return None
-
 
     def defer_task(id):
         api.defer_task(str(id))
@@ -73,7 +85,9 @@ def main(page: ft.Page):
     def finish_current_task(e):
         task_to_finish = get_single_task_item()
         api.toggle_complete(str(task_to_finish.id))
-        page.add(ft.SnackBar(f"Good Job. You've completed task: {task_to_finish.title}"))
+        page.add(
+            ft.SnackBar(f"Good Job. You've completed task: {task_to_finish.title}")
+        )
         if get_single_task_item() is not None:
             single_task_display_text.value = get_single_task_item().title
         else:
@@ -101,7 +115,7 @@ def main(page: ft.Page):
                     ft.Text(
                         value="What do you want to do now?",
                         theme_style=ft.TextThemeStyle.BODY_LARGE,
-                        color=ft.Colors.GREY_500
+                        color=ft.Colors.GREY_500,
                     )
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -198,9 +212,7 @@ def main(page: ft.Page):
                 [current_task_display],
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
-            ft.Row(
-                height=200
-            ),
+            ft.Row(height=200),
             ft.Row(
                 [
                     ft.ElevatedButton(
@@ -223,6 +235,51 @@ def main(page: ft.Page):
     # Task list view:
     task_list_control = ListTasksView()
     task_list_view = ft.Row([task_list_control])
+
+    # Settings View:
+    def radiogroup_changed(e):
+        page.theme_mode = (
+            ft.ThemeMode.LIGHT if e.control.value == "light" else ft.ThemeMode.DARK
+        )
+        page.update()
+
+    settings_view = ft.Column(
+        [
+            ft.Row(
+                [
+                    ft.RadioGroup(
+                        content=ft.Column(
+                            [
+                                ft.Text("Theme"),
+                                ft.Row(
+                                    [
+                                        ft.Icon(name=ft.Icons.LIGHT_MODE_OUTLINED),
+                                        ft.Radio(value="light", label="Light"),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.START,
+                                ),
+                                ft.Row(
+                                    [
+                                        ft.Icon(name=ft.Icons.DARK_MODE_OUTLINED),
+                                        ft.Radio(value="dark", label="Dark"),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.START,
+
+                                ),
+                            ],
+                        ),
+                        value="light"
+                        if page.theme_mode == ft.ThemeMode.LIGHT
+                        else "dark",
+                        on_change=radiogroup_changed,
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.START,
+            )
+        ],
+        alignment=ft.CrossAxisAlignment.STRETCH,
+    )
+
     # used by route_change() to set the view matching the route
     page_views = {
         "/": ft.View(
@@ -259,15 +316,16 @@ def main(page: ft.Page):
                 task_list_view,
             ],
         ),
-        "/new": ft.View(
-            "/new",
+        "/settings": ft.View(
+            "/settings",
             [
                 drawer,
                 ft.AppBar(
-                    title=ft.Text("New Task"),
+                    title=ft.Text("Settings"),
                     bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 ),
                 ft.ElevatedButton("Back", on_click=lambda _: page.go("/")),
+                settings_view,
             ],
         ),
     }
@@ -285,19 +343,6 @@ def main(page: ft.Page):
     page.on_route_change = route_change
     page.on_view_pop = view_pop
     page.go(page.route)
-
-    # window
-    page.window.min_width = 414
-    page.window.min_height = 760
-    page.window.width = 414
-    page.window.height = 760
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.vertical_alignment = ft.CrossAxisAlignment.CENTER
-
-    page.scroll = ft.ScrollMode.ADAPTIVE
-
-    page.theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
-    page.dark_theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
 
 
 ft.app(main, view=ft.AppView.WEB_BROWSER)
