@@ -51,7 +51,16 @@ def main(page: ft.Page):
     page.scroll = ft.ScrollMode.ADAPTIVE
 
     api = TaskAPI(db_url=sqlite_url)
+    
 
+    def get_task_list_from_db():
+        task_list_from_db = api.list_all_tasks()
+        if len(task_list_from_db) > 0:
+            return task_list_from_db
+        else:
+            return []
+
+    
     # must be in the same order as page_views routes
     routes = ["/", "/focus", "/list", "/settings"]
 
@@ -233,7 +242,7 @@ def main(page: ft.Page):
     )
 
     # Task list view:
-    task_list_control = ListTasksView()
+    task_list_control = ListTasksView(get_task_list_from_db=get_task_list_from_db)
     task_list_view = ft.Row([task_list_control])
 
     # Settings View:

@@ -85,7 +85,7 @@ class TaskControl(ft.Column):
 
 
 class ListTasksView(ft.Column):
-    def __init__(self):
+    def __init__(self, get_task_list_from_db):
         super().__init__()
         self.new_task = ft.TextField(
             hint_text="What needs to be done?",
@@ -93,9 +93,9 @@ class ListTasksView(ft.Column):
             expand=True,
             max_length=30,
         )
-        self.tasks = ft.Column()
+        self.tasks = ft.ListView(spacing=0, auto_scroll=False)
 
-        self.task_list_from_db = self.get_task_list_from_db()
+        self.get_task_list_from_db = get_task_list_from_db
 
         self.filter = ft.Tabs(
             scrollable=False,
@@ -117,31 +117,31 @@ class ListTasksView(ft.Column):
                     ),
                 ],
             ),
-            ft.Column(
-                spacing=25,
-                controls=[
-                    self.filter,
-                    self.tasks,
-                    ft.Row(
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        controls=[
-                            self.items_left,
-                            ft.OutlinedButton(
-                                text="Clear completed", on_click=self.clear_clicked
-                            ),
-                        ],
-                    ),
-                ],
+            ft.Container(
+                expand=True,
+                bgcolor=ft.Colors.WHITE,
+                content=ft.Column(
+                    spacing=25,
+                    expand=True,
+                    scroll=ft.ScrollMode.AUTO,
+                    controls=[
+                        self.filter,
+                        self.tasks,
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                self.items_left,
+                                ft.OutlinedButton(
+                                    text="Clear completed",
+                                    on_click=self.clear_clicked,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
             ),
         ]
-
-    def get_task_list_from_db(self):
-        task_list_from_db = api.list_all_tasks()
-        if len(task_list_from_db) > 0:
-            return task_list_from_db
-        else:
-            return []
 
     def add_clicked(self, e):
         if self.new_task.value:
@@ -149,7 +149,10 @@ class ListTasksView(ft.Column):
             added_task_id = api.add_task(task)
             added_task = api.get_task(str(added_task_id))
             task_control = TaskControl(
-                added_task, self.task_status_change, self.task_title_update, self.task_delete
+                added_task,
+                self.task_status_change,
+                self.task_title_update,
+                self.task_delete,
             )
             self.tasks.controls.append(task_control)
             self.new_task.value = ""
@@ -160,7 +163,7 @@ class ListTasksView(ft.Column):
         updated_task = api.toggle_complete(str(task.id))
         task.is_completed = updated_task.is_completed
         self.update()
-    
+
     def task_title_update(self, task, title):
         updated_task = api.update_task_title(str(task.id), title)
         task.title = updated_task.title
@@ -181,8 +184,13 @@ class ListTasksView(ft.Column):
 
     def build(self):
         if not len(self.tasks.controls):
-            for task in self.task_list_from_db:
-                task_item = TaskControl(task, self.task_status_change, self.task_title_update, self.task_delete)
+            for task in self.get_task_list_from_db():
+                task_item = TaskControl(
+                    task,
+                    self.task_status_change,
+                    self.task_title_update,
+                    self.task_delete,
+                )
                 self.tasks.controls.append(task_item)
 
     def before_update(self):
