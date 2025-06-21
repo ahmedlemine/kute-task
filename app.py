@@ -34,6 +34,317 @@ class Drawer(ft.NavigationDrawer):
         ]
 
 
+class MainApp(ft.View):
+    def __init__(self, api, page):
+        super().__init__()
+        self.api = api
+        page.on_route_change = self.route_change
+        self.drawer = Drawer(self.handle_drwr_change)
+        self.task_list = self.get_task_list_from_db()
+        self.routes = ["/", "/focus", "/list", "/settings"]
+        self.single_task_item = self.get_single_task_item()
+        self.current_focus_task = self.get_single_task_item()
+
+        # controls
+        self.single_task_display_text = ft.Text(
+            value=self.single_task_item.title
+            if self.single_task_item is not None
+            else "no remaining tasks",
+            theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
+            max_lines=3,
+            width=320,
+            text_align=ft.TextAlign.CENTER,
+            style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+        )
+
+        self.select_task_view = ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Text(
+                            value="What do you want to do now?",
+                            theme_style=ft.TextThemeStyle.BODY_LARGE,
+                            color=ft.Colors.GREY_500,
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(  # temp empty spacing
+                    height=60
+                ),
+                ft.Row(
+                    [self.single_task_display_text],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(  # temp empty spacing
+                    height=10
+                ),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            text="Do Now",
+                            on_click=self.set_current_focus_task,
+                            width=200,
+                            style=ft.ButtonStyle(
+                                padding=20,
+                                bgcolor=ft.Colors.INDIGO,
+                                color=ft.Colors.WHITE,
+                                text_style=ft.TextStyle(size=24),
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            "Defer",
+                            on_click=lambda e: self.defer_task(
+                                self.single_task_item().id
+                            ),
+                            width=200,
+                            style=ft.ButtonStyle(
+                                padding=20,
+                                text_style=ft.TextStyle(size=24),
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            alignment=ft.CrossAxisAlignment.STRETCH,
+            visible=self.get_single_task_item() is not None,
+        )
+
+        # View /focus : focusing on only 1 task that's being done now:
+        self.current_task_display = ft.Text(
+            value=self.single_task_item.title
+            if self.single_task_item is not None
+            else "no remaining tasks",
+            max_lines=5,
+            width=320,
+            text_align=ft.TextAlign.CENTER,
+            theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
+            style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+        )
+
+        self.empty_tasks_home_view = ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Text(
+                            value="No unfinished tasks to select from. Please add somet tasks to start.",
+                            theme_style=ft.TextThemeStyle.BODY_LARGE,
+                            max_lines=5,
+                            width=320,
+                            text_align=ft.TextAlign.CENTER,
+                            style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            alignment=ft.CrossAxisAlignment.STRETCH,
+            visible=self.get_single_task_item() is None,
+        )
+
+        self.focus_mode_view = ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Text(
+                            value="currently wroking on:",
+                            theme_style=ft.TextThemeStyle.BODY_LARGE,
+                            style=ft.TextStyle(color=ft.Colors.GREY_600),
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [self.current_task_display],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(height=200),
+                ft.Row(
+                    [
+                        ft.ElevatedButton(
+                            "Done",
+                            on_click=self.finish_current_task,
+                            width=200,
+                            visible=self.get_single_task_item() is not None,
+                            style=ft.ButtonStyle(
+                                padding=20,
+                                text_style=ft.TextStyle(size=24),
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ],
+            alignment=ft.CrossAxisAlignment.STRETCH,
+        )
+
+        # Task list view:
+        self.task_list_control = ListTasksView(
+            get_task_list_from_db=self.get_task_list_from_db
+        )
+        self.task_list_view = ft.Row([self.task_list_control])
+
+        # Settings View
+        self.settings_view = ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.RadioGroup(
+                            content=ft.Column(
+                                [
+                                    ft.Text("Theme"),
+                                    ft.Row(
+                                        [
+                                            ft.Icon(name=ft.Icons.LIGHT_MODE_OUTLINED),
+                                            ft.Radio(value="light", label="Light"),
+                                        ],
+                                        alignment=ft.MainAxisAlignment.START,
+                                    ),
+                                    ft.Row(
+                                        [
+                                            ft.Icon(name=ft.Icons.DARK_MODE_OUTLINED),
+                                            ft.Radio(value="dark", label="Dark"),
+                                        ],
+                                        alignment=ft.MainAxisAlignment.START,
+                                    ),
+                                ],
+                            ),
+                            value="light"
+                            if page.theme_mode == ft.ThemeMode.LIGHT
+                            else "dark",
+                            on_change=self.radiogroup_changed,
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.START,
+                )
+            ],
+            alignment=ft.CrossAxisAlignment.STRETCH,
+        )
+
+        # used by route_change() to set the view matching the route
+        self.page_views = {
+            "/": ft.View(
+                "/",
+                [
+                    self.drawer,
+                    ft.AppBar(
+                        title=ft.Text("Home"),
+                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    ),
+                    self.select_task_view,
+                    self.empty_tasks_home_view,
+                ],
+            ),
+            "/focus": ft.View(
+                "/focus",
+                [
+                    self.drawer,
+                    ft.AppBar(
+                        title=ft.Text("Focus Mode"),
+                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    ),
+                    self.focus_mode_view,
+                ],
+            ),
+            "/list": ft.View(
+                "/list",
+                [
+                    self.drawer,
+                    ft.AppBar(
+                        title=ft.Text("Task List"),
+                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    ),
+                    self.task_list_view,
+                ],
+            ),
+            "/settings": ft.View(
+                "/settings",
+                [
+                    self.drawer,
+                    ft.AppBar(
+                        title=ft.Text("Settings"),
+                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    ),
+                    ft.ElevatedButton("Back", on_click=lambda _: page.go("/")),
+                    self.settings_view,
+                ],
+            ),
+        }
+
+    def get_task_list_from_db(self):
+        task_list_from_db = self.api.list_all_tasks()
+        if len(task_list_from_db) > 0:
+            return task_list_from_db
+        else:
+            return []
+
+    def set_task_list(self):
+        self.task_list = self.get_task_list_from_db()
+
+    def get_single_task_item(self):
+        next_task = self.api.get_next_task()
+        if next_task is not None:
+            return next_task
+        return None
+
+    def set_single_task_item(self):
+        self.single_task_item = self.get_single_task_item()
+
+    def defer_task(self, e, id):
+        self.api.defer_task(str(id))
+        self.single_task_display_text.value = self.get_single_task_item().title
+        e.page.update()
+
+    def set_current_focus_task(self, e):
+        current_task = self.get_single_task_item()
+        self.current_focus_task = current_task
+        self.current_task_display.value = current_task.title
+        e.page.go("/focus")
+
+    def update_single_task_item(self):
+        self.single_task_display_text.value = self.get_single_task_item().title
+        self.page.update()
+
+    def finish_current_task(self, e):
+        task_to_finish = self.current_focus_task
+        self.api.toggle_complete(str(task_to_finish.id))
+        self.current_focus_task = None
+        e.page.add(
+            ft.SnackBar(f"Good Job. You've completed task: {task_to_finish.title}")
+        )
+        if self.get_single_task_item() is not None:
+            self.single_task_item = self.get_single_task_item()
+            self.single_task_display_text.value = self.single_task_item.title
+        else:
+            self.select_task_view.visible = False
+            self.empty_tasks_home_view.visible = True
+        e.page.go("/")
+        e.page.update()
+
+    def handle_drwr_change(self, e):
+        e.page.go(self.routes[e.control.selected_index])
+        e.open = False
+
+    def radiogroup_changed(self, e):
+        e.page.theme_mode = (
+            ft.ThemeMode.LIGHT if e.control.value == "light" else ft.ThemeMode.DARK
+        )
+        e.page.update()
+
+    def route_change(self, route):
+        page = route.page
+        if page is not None:
+            page.views.clear()
+            page.views.append(self.page_views[page.route])
+            page.update()
+
+
 def main(page: ft.Page):
     page.title = "Kute Task"
     page.theme = ft.Theme(color_scheme_seed=ft.Colors.INDIGO)
@@ -51,306 +362,17 @@ def main(page: ft.Page):
     page.scroll = ft.ScrollMode.ADAPTIVE
 
     api = TaskAPI(db_url=sqlite_url)
-    
-
-    def get_task_list_from_db():
-        task_list_from_db = api.list_all_tasks()
-        if len(task_list_from_db) > 0:
-            return task_list_from_db
-        else:
-            return []
-
-    
-    # must be in the same order as page_views routes
-    routes = ["/", "/focus", "/list", "/settings"]
-
-    def handle_drwr_change(e):
-        page.go(routes[e.control.selected_index])
-        e.open = False
-
-    drawer = Drawer(handle_drwr_change)
-    page.drawer = drawer
-    page.update()
-
-    def get_single_task_item():
-        next_task = api.get_next_task()
-        if next_task is not None:
-            return next_task
-        return None
-
-    def defer_task(id):
-        api.defer_task(str(id))
-        single_task_display_text.value = get_single_task_item().title
-        page.update()
-
-    def set_current_focus_task(e):
-        current_task_display.value = get_single_task_item().title
-        page.go("/focus")
-
-    def update_single_task_item():
-        single_task_display_text.value = get_single_task_item().title
-        page.update()
-
-    def finish_current_task(e):
-        task_to_finish = get_single_task_item()
-        api.toggle_complete(str(task_to_finish.id))
-        page.add(
-            ft.SnackBar(f"Good Job. You've completed task: {task_to_finish.title}")
-        )
-        if get_single_task_item() is not None:
-            single_task_display_text.value = get_single_task_item().title
-        else:
-            select_task_view.visible = False
-            empty_tasks_home_view.visible = True
-        page.go("/")
-        page.update()
-
-    # View / : selecting a task to do now:
-    single_task_display_text = ft.Text(
-        value=get_single_task_item().title
-        if get_single_task_item() is not None
-        else "no remaining tasks",
-        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-        max_lines=3,
-        width=320,
-        text_align=ft.TextAlign.CENTER,
-        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-    )
-
-    select_task_view = ft.Column(
-        [
-            ft.Row(
-                [
-                    ft.Text(
-                        value="What do you want to do now?",
-                        theme_style=ft.TextThemeStyle.BODY_LARGE,
-                        color=ft.Colors.GREY_500,
-                    )
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-            ft.Row(  # temp empty spacing
-                height=60
-            ),
-            ft.Row(
-                [single_task_display_text],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-            ft.Row(  # temp empty spacing
-                height=10
-            ),
-            ft.Row(
-                [
-                    ft.ElevatedButton(
-                        text="Do Now",
-                        on_click=set_current_focus_task,
-                        width=200,
-                        style=ft.ButtonStyle(
-                            padding=20,
-                            bgcolor=ft.Colors.INDIGO,
-                            color=ft.Colors.WHITE,
-                            text_style=ft.TextStyle(size=24),
-                        ),
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-            ft.Row(
-                [
-                    ft.ElevatedButton(
-                        "Defer",
-                        on_click=lambda _: defer_task(get_single_task_item().id),
-                        width=200,
-                        style=ft.ButtonStyle(
-                            padding=20,
-                            text_style=ft.TextStyle(size=24),
-                        ),
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-        ],
-        alignment=ft.CrossAxisAlignment.STRETCH,
-        visible=get_single_task_item() is not None,
-    )
-    # View /focus : focusing on only 1 task that's being done now:
-    current_task_display = ft.Text(
-        value=get_single_task_item().title
-        if get_single_task_item() is not None
-        else "no remaining tasks",
-        max_lines=5,
-        width=320,
-        text_align=ft.TextAlign.CENTER,
-        theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
-        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-    )
-
-    empty_tasks_home_view = ft.Column(
-        [
-            ft.Row(
-                [
-                    ft.Text(
-                        value="No unfinished tasks to select from. Please add somet tasks to start.",
-                        theme_style=ft.TextThemeStyle.BODY_LARGE,
-                        max_lines=5,
-                        width=320,
-                        text_align=ft.TextAlign.CENTER,
-                        style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-                    )
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-        ],
-        alignment=ft.CrossAxisAlignment.STRETCH,
-        visible=get_single_task_item() is None,
-    )
-
-    focus_mode_view = ft.Column(
-        [
-            ft.Row(
-                [
-                    ft.Text(
-                        value="currently wroking on:",
-                        theme_style=ft.TextThemeStyle.BODY_LARGE,
-                        style=ft.TextStyle(color=ft.Colors.GREY_600),
-                    )
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-            ft.Row(
-                [current_task_display],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-            ft.Row(height=200),
-            ft.Row(
-                [
-                    ft.ElevatedButton(
-                        "Done",
-                        on_click=finish_current_task,
-                        width=200,
-                        visible=get_single_task_item() is not None,
-                        style=ft.ButtonStyle(
-                            padding=20,
-                            text_style=ft.TextStyle(size=24),
-                        ),
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-        ],
-        alignment=ft.CrossAxisAlignment.STRETCH,
-    )
-
-    # Task list view:
-    task_list_control = ListTasksView(get_task_list_from_db=get_task_list_from_db)
-    task_list_view = ft.Row([task_list_control])
-
-    # Settings View:
-    def radiogroup_changed(e):
-        page.theme_mode = (
-            ft.ThemeMode.LIGHT if e.control.value == "light" else ft.ThemeMode.DARK
-        )
-        page.update()
-
-    settings_view = ft.Column(
-        [
-            ft.Row(
-                [
-                    ft.RadioGroup(
-                        content=ft.Column(
-                            [
-                                ft.Text("Theme"),
-                                ft.Row(
-                                    [
-                                        ft.Icon(name=ft.Icons.LIGHT_MODE_OUTLINED),
-                                        ft.Radio(value="light", label="Light"),
-                                    ],
-                                    alignment=ft.MainAxisAlignment.START,
-                                ),
-                                ft.Row(
-                                    [
-                                        ft.Icon(name=ft.Icons.DARK_MODE_OUTLINED),
-                                        ft.Radio(value="dark", label="Dark"),
-                                    ],
-                                    alignment=ft.MainAxisAlignment.START,
-
-                                ),
-                            ],
-                        ),
-                        value="light"
-                        if page.theme_mode == ft.ThemeMode.LIGHT
-                        else "dark",
-                        on_change=radiogroup_changed,
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.START,
-            )
-        ],
-        alignment=ft.CrossAxisAlignment.STRETCH,
-    )
-
-    # used by route_change() to set the view matching the route
-    page_views = {
-        "/": ft.View(
-            "/",
-            [
-                drawer,
-                ft.AppBar(
-                    title=ft.Text("Home"),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                ),
-                select_task_view,
-                empty_tasks_home_view,
-            ],
-        ),
-        "/focus": ft.View(
-            "/focus",
-            [
-                drawer,
-                ft.AppBar(
-                    title=ft.Text("Focus Mode"),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                ),
-                focus_mode_view,
-            ],
-        ),
-        "/list": ft.View(
-            "/list",
-            [
-                drawer,
-                ft.AppBar(
-                    title=ft.Text("Task List"),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                ),
-                task_list_view,
-            ],
-        ),
-        "/settings": ft.View(
-            "/settings",
-            [
-                drawer,
-                ft.AppBar(
-                    title=ft.Text("Settings"),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                ),
-                ft.ElevatedButton("Back", on_click=lambda _: page.go("/")),
-                settings_view,
-            ],
-        ),
-    }
-
-    def route_change(route):
-        page.views.clear()
-        page.views.append(page_views[page.route])
-        page.update()
 
     def view_pop(view):
         page.views.pop()
         top_view = page.views[-1]
         page.go(top_view.route)
 
-    page.on_route_change = route_change
+    main_app = MainApp(api=api, page=page)
+    page.add(main_app)
+
     page.on_view_pop = view_pop
+    page.on_route_change = main_app.route_change
     page.go(page.route)
 
 
