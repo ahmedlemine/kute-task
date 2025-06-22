@@ -63,22 +63,19 @@ class MainApp(ft.View):
                 ft.Row(
                     [
                         ft.Text(
-                            value="What do you want to do now?",
+                            value="What task do you want to do now?",
                             theme_style=ft.TextThemeStyle.BODY_LARGE,
                             color=ft.Colors.GREY_500,
-                        )
+                        ),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
-                ft.Row(  # temp empty spacing
-                    height=60
-                ),
-                ft.Row(
-                    [self.single_task_display_text],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                ),
-                ft.Row(  # temp empty spacing
-                    height=10
+                ft.Container(
+                    content=ft.Row(
+                        [self.single_task_display_text],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    ),
+                    padding=20,
                 ),
                 ft.Row(
                     [
@@ -113,7 +110,7 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
             ],
-            alignment=ft.CrossAxisAlignment.STRETCH,
+            alignment=ft.CrossAxisAlignment.CENTER,
             visible=self.get_single_task_item() is not None,
         )
 
@@ -155,7 +152,7 @@ class MainApp(ft.View):
             alignment=ft.CrossAxisAlignment.STRETCH,
             visible=self.get_single_task_item() is None,
         )
-        # /focus view
+        # /focus View
         self.focus_mode_view = ft.Column(
             [
                 ft.Row(
@@ -173,16 +170,15 @@ class MainApp(ft.View):
                     [self.current_task_display],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
-                ft.Row(height=200),
                 ft.Row(
                     [self.current_task_done_btn],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
             ],
-            alignment=ft.CrossAxisAlignment.STRETCH,
+            alignment=ft.CrossAxisAlignment.CENTER,
         )
 
-        # /list : Task list view:
+        # /list: Task list view:
         self.task_list_control = ListTasksView(
             get_task_list_from_db=self.get_task_list_from_db
         )
@@ -235,8 +231,18 @@ class MainApp(ft.View):
                         title=ft.Text("Home"),
                         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                     ),
-                    self.select_task_view,
-                    self.empty_tasks_home_view,
+                    ft.Container(
+                        content=ft.Column(
+                            [
+                                self.select_task_view,
+                                self.empty_tasks_home_view,
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                        alignment=ft.alignment.center,
+                        expand=True,
+                    ),
                 ],
             ),
             "/focus": ft.View(
@@ -247,7 +253,17 @@ class MainApp(ft.View):
                         title=ft.Text("Focus Mode"),
                         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                     ),
-                    self.focus_mode_view,
+                    ft.Container(
+                        content=ft.Column(
+                            [
+                                self.focus_mode_view,
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                        alignment=ft.alignment.center,
+                        expand=True,
+                    ),
                 ],
             ),
             "/list": ft.View(
@@ -292,7 +308,6 @@ class MainApp(ft.View):
         self.api.defer_task(str(task.id))
         self.single_task_display_text.value = self.get_single_task_item().title
         e.page.update()
-
 
     def set_current_focus_task(self, e):
         current_task = self.get_single_task_item()
