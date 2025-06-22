@@ -7,6 +7,8 @@ api = TaskAPI(sqlite_url)
 
 
 class TaskControl(ft.Column):
+    """custom control to represnt a single task item in the task list view"""
+
     def __init__(self, task, task_status_change, task_title_update, task_delete):
         super().__init__()
         self.task = task
@@ -74,7 +76,6 @@ class TaskControl(ft.Column):
         self.task_title_update(self.task, self.display_task.label)
         self.display_view.visible = True
         self.edit_view.visible = False
-        # self.update()
 
     def status_changed(self, e):
         self.completed = self.display_task.value
@@ -85,6 +86,9 @@ class TaskControl(ft.Column):
 
 
 class ListTasksView(ft.Column):
+    """a view to display a list of task (each task represented by a TaskControl)
+    with a tab for filtering and a textbox for adding new tasks"""
+
     def __init__(self, get_task_list_from_db):
         super().__init__()
         self.new_task = ft.TextField(
@@ -119,7 +123,6 @@ class ListTasksView(ft.Column):
             ),
             ft.Container(
                 expand=True,
-                bgcolor=ft.Colors.WHITE,
                 content=ft.Column(
                     spacing=25,
                     expand=True,
@@ -203,6 +206,6 @@ class ListTasksView(ft.Column):
                 or (status == "active" and t.task.is_completed == False)
                 or (status == "completed" and t.task.is_completed)
             )
-            if not t.task.is_completed:
+            if t.task.is_completed:
                 count += 1
-        self.items_left.value = f"{count} active item(s) left"
+        self.items_left.value = f"{count} task(s) done of {api.count_tasks()} total"
