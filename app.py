@@ -297,18 +297,17 @@ class MainApp(ft.View):
     def set_current_focus_task(self, e):
         current_task = self.get_single_task_item()
         self.current_focus_task = current_task
-        # print("+++++++++++++++++CURRENT FOCUS TASK From Set current focus task++++++++++++++:", self.current_focus_task)
         self.current_task_display.value = current_task.title
         self.current_task_done_btn.visible = True
         e.page.go("/focus")
         e.page.update()
 
     def finish_current_task(self, e):
-        print("+++++++++++++++++CURRENT FOCUS TASK from finish++++++++++++++:", self.current_focus_task)
         task_to_finish = self.current_focus_task
         self.api.toggle_complete(str(task_to_finish.id))
 
         self.current_focus_task = None
+        self.current_task_display.value = "no task selected."
         self.current_task_done_btn.visible = False
         e.page.update()
 
