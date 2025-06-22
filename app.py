@@ -43,7 +43,7 @@ class MainApp(ft.View):
         self.task_list = self.get_task_list_from_db()
         self.routes = ["/", "/focus", "/list", "/settings"]
         self.single_task_item = self.get_single_task_item()
-        self.current_focus_task = self.get_single_task_item()
+        self.current_focus_task = None
 
         # controls
         self.single_task_display_text = ft.Text(
@@ -57,6 +57,7 @@ class MainApp(ft.View):
             style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
         )
 
+        # / view
         self.select_task_view = ft.Column(
             [
                 ft.Row(
@@ -100,7 +101,7 @@ class MainApp(ft.View):
                         ft.ElevatedButton(
                             "Defer",
                             on_click=lambda e: self.defer_task(
-                                self.single_task_item().id
+                                self.get_single_task_item(), e
                             ),
                             width=200,
                             style=ft.ButtonStyle(
@@ -116,16 +117,23 @@ class MainApp(ft.View):
             visible=self.get_single_task_item() is not None,
         )
 
-        # View /focus : focusing on only 1 task that's being done now:
         self.current_task_display = ft.Text(
-            value=self.single_task_item.title
-            if self.single_task_item is not None
-            else "no remaining tasks",
+            value="no task selected."
+            if self.current_focus_task is None
+            else self.current_focus_task.title,
             max_lines=5,
             width=320,
             text_align=ft.TextAlign.CENTER,
             theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
             style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+        )
+
+        self.current_task_done_btn = ft.ElevatedButton(
+            "Done",
+            on_click=self.finish_current_task,
+            width=200,
+            visible=False,
+            style=ft.ButtonStyle(padding=20),
         )
 
         self.empty_tasks_home_view = ft.Column(
@@ -147,13 +155,14 @@ class MainApp(ft.View):
             alignment=ft.CrossAxisAlignment.STRETCH,
             visible=self.get_single_task_item() is None,
         )
-
+        # /focus view
         self.focus_mode_view = ft.Column(
             [
                 ft.Row(
                     [
                         ft.Text(
                             value="currently wroking on:",
+                            visible=self.current_focus_task is not None,
                             theme_style=ft.TextThemeStyle.BODY_LARGE,
                             style=ft.TextStyle(color=ft.Colors.GREY_600),
                         )
@@ -166,31 +175,20 @@ class MainApp(ft.View):
                 ),
                 ft.Row(height=200),
                 ft.Row(
-                    [
-                        ft.ElevatedButton(
-                            "Done",
-                            on_click=self.finish_current_task,
-                            width=200,
-                            visible=self.get_single_task_item() is not None,
-                            style=ft.ButtonStyle(
-                                padding=20,
-                                text_style=ft.TextStyle(size=24),
-                            ),
-                        ),
-                    ],
+                    [self.current_task_done_btn],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
             ],
             alignment=ft.CrossAxisAlignment.STRETCH,
         )
 
-        # Task list view:
+        # /list : Task list view:
         self.task_list_control = ListTasksView(
             get_task_list_from_db=self.get_task_list_from_db
         )
         self.task_list_view = ft.Row([self.task_list_control])
 
-        # Settings View
+        # /settings View
         self.settings_view = ft.Column(
             [
                 ft.Row(
@@ -288,44 +286,40 @@ class MainApp(ft.View):
         self.task_list = self.get_task_list_from_db()
 
     def get_single_task_item(self):
-        next_task = self.api.get_next_task()
-        if next_task is not None:
-            return next_task
-        return None
+        return self.api.get_next_task() or None
 
-    def set_single_task_item(self):
-        self.single_task_item = self.get_single_task_item()
-
-    def defer_task(self, e, id):
-        self.api.defer_task(str(id))
+    def defer_task(self, task, e):
+        self.api.defer_task(str(task.id))
         self.single_task_display_text.value = self.get_single_task_item().title
         e.page.update()
+
 
     def set_current_focus_task(self, e):
         current_task = self.get_single_task_item()
         self.current_focus_task = current_task
+        # print("+++++++++++++++++CURRENT FOCUS TASK From Set current focus task++++++++++++++:", self.current_focus_task)
         self.current_task_display.value = current_task.title
+        self.current_task_done_btn.visible = True
         e.page.go("/focus")
-
-    def update_single_task_item(self):
-        self.single_task_display_text.value = self.get_single_task_item().title
-        self.page.update()
+        e.page.update()
 
     def finish_current_task(self, e):
+        print("+++++++++++++++++CURRENT FOCUS TASK from finish++++++++++++++:", self.current_focus_task)
         task_to_finish = self.current_focus_task
         self.api.toggle_complete(str(task_to_finish.id))
+
         self.current_focus_task = None
-        e.page.add(
-            ft.SnackBar(f"Good Job. You've completed task: {task_to_finish.title}")
-        )
+        self.current_task_done_btn.visible = False
+        e.page.update()
+
         if self.get_single_task_item() is not None:
             self.single_task_item = self.get_single_task_item()
             self.single_task_display_text.value = self.single_task_item.title
         else:
             self.select_task_view.visible = False
             self.empty_tasks_home_view.visible = True
-        e.page.go("/")
         e.page.update()
+        e.page.go("/")
 
     def handle_drwr_change(self, e):
         e.page.go(self.routes[e.control.selected_index])
