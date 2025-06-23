@@ -360,7 +360,7 @@ class MainApp(ft.View):
         self.current_task_display.visible = False
         self.current_task_done_btn.visible = False
         self.empty_current_task_view.visible = True
-        e.page.update()
+        self.task_list_control.build()
 
         if self.get_single_task_item() is not None:
             self.single_task_item = self.get_single_task_item()

@@ -186,6 +186,7 @@ class ListTasksView(ft.Column):
                 self.task_delete(t, t.task.id)
 
     def build(self):
+        self.tasks.controls.clear()
         if not len(self.tasks.controls):
             for task in self.get_task_list_from_db():
                 task_item = TaskControl(
