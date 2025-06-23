@@ -97,7 +97,7 @@ class ListTasksView(ft.Column):
             expand=True,
             max_length=30,
         )
-        self.tasks = ft.ListView(spacing=0, auto_scroll=False)
+        self.tasks = ft.ListView(spacing=0, auto_scroll=False, expand=True)
 
         self.get_task_list_from_db = get_task_list_from_db
 
@@ -206,6 +206,6 @@ class ListTasksView(ft.Column):
                 or (status == "active" and t.task.is_completed == False)
                 or (status == "completed" and t.task.is_completed)
             )
-            if t.task.is_completed:
+            if not t.task.is_completed:
                 count += 1
-        self.items_left.value = f"{count} task(s) done of {api.count_tasks()} total"
+        self.items_left.value = f"{count} task(s) left of {api.count_tasks()} total"
