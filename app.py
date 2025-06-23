@@ -115,14 +115,32 @@ class MainApp(ft.View):
         )
 
         self.current_task_display = ft.Text(
-            value="no task selected."
-            if self.current_focus_task is None
-            else self.current_focus_task.title,
+            value=self.current_focus_task.title
+            if self.current_focus_task is not None
+            else "no task selected.",
             max_lines=5,
             width=320,
             text_align=ft.TextAlign.CENTER,
             theme_style=ft.TextThemeStyle.HEADLINE_LARGE,
             style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+            visible=self.current_focus_task is not None,
+        )
+
+        self.empty_current_task_view = ft.Column(
+            [
+                ft.Row(
+                    [
+                        ft.Text(
+                            value="no task selected.",
+                            text_align=ft.TextAlign.CENTER,
+                            theme_style=ft.TextThemeStyle.BODY_LARGE,
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                )
+            ],
+            alignment=ft.CrossAxisAlignment.STRETCH,
+            visible=self.current_focus_task is None,
         )
 
         self.current_task_done_btn = ft.ElevatedButton(
@@ -130,7 +148,7 @@ class MainApp(ft.View):
             on_click=self.finish_current_task,
             width=200,
             visible=False,
-            style=ft.ButtonStyle(padding=20),
+            style=ft.ButtonStyle(padding=20, text_style=ft.TextStyle(size=18)),
         )
 
         self.empty_tasks_home_view = ft.Column(
@@ -178,7 +196,7 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [self.current_task_display],
+                    [self.current_task_display, self.empty_current_task_view],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
@@ -311,7 +329,7 @@ class MainApp(ft.View):
 
     def set_task_list(self):
         self.task_list = self.get_task_list_from_db()
-    
+
     def set_single_task_item(self):
         self.single_task_item = self.get_single_task_item()
 
@@ -326,8 +344,11 @@ class MainApp(ft.View):
     def set_current_focus_task(self, e):
         current_task = self.get_single_task_item()
         self.current_focus_task = current_task
+
         self.current_task_display.value = current_task.title
+        self.current_task_display.visible = True
         self.current_task_done_btn.visible = True
+        self.empty_current_task_view.visible = False
         e.page.go("/focus")
         e.page.update()
 
@@ -336,8 +357,9 @@ class MainApp(ft.View):
         self.api.toggle_complete(str(task_to_finish.id))
 
         self.current_focus_task = None
-        self.current_task_display.value = "no task selected."
+        self.current_task_display.visible = False
         self.current_task_done_btn.visible = False
+        self.empty_current_task_view.visible = True
         e.page.update()
 
         if self.get_single_task_item() is not None:
