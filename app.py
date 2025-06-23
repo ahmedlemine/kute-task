@@ -138,15 +138,26 @@ class MainApp(ft.View):
                 ft.Row(
                     [
                         ft.Text(
-                            value="No unfinished tasks to select from. Please add somet tasks to start.",
+                            value="No unfinished tasks to select from. Please add some tasks to start.",
                             theme_style=ft.TextThemeStyle.BODY_LARGE,
                             max_lines=5,
                             width=320,
                             text_align=ft.TextAlign.CENTER,
                             style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-                        )
+                        ),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [
+                        ft.Container(
+                            content=ft.FloatingActionButton(
+                                icon=ft.Icons.ADD,
+                                on_click=lambda _: page.go("/list"),
+                            ),
+                            alignment=ft.Alignment(0.5, 0.5),
+                        )
+                    ],
                 ),
             ],
             alignment=ft.CrossAxisAlignment.STRETCH,
@@ -300,6 +311,9 @@ class MainApp(ft.View):
 
     def set_task_list(self):
         self.task_list = self.get_task_list_from_db()
+    
+    def set_single_task_item(self):
+        self.single_task_item = self.get_single_task_item()
 
     def get_single_task_item(self):
         return self.api.get_next_task() or None
@@ -349,8 +363,21 @@ class MainApp(ft.View):
         page = route.page
         if page is not None:
             page.views.clear()
+            if page.route == "/":
+                if self.get_single_task_item() is not None:
+                    self.single_task_item = self.get_single_task_item()
+                    self.single_task_display_text.value = self.single_task_item.title
+                    self.select_task_view.visible = True
+                    self.empty_tasks_home_view.visible = False
+                else:
+                    self.select_task_view.visible = False
+                    self.empty_tasks_home_view.visible = True
             page.views.append(self.page_views[page.route])
             page.update()
+
+    def before_update(self):
+        self.set_single_task_item()
+        self.set_task_list()
 
 
 def main(page: ft.Page):
