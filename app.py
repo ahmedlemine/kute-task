@@ -58,6 +58,16 @@ class MainApp(ft.View):
         )
 
         # / view
+        self.empty_home_view_add_fab_btn = ft.Container(
+            content=ft.FloatingActionButton(
+                icon=ft.Icons.ADD,
+                on_click=lambda _: page.go("/list"),
+            ),
+            expand=True,
+            alignment=ft.Alignment(1.0, 1.0),
+            padding=20,
+        )
+
         self.select_task_view = ft.Column(
             [
                 ft.Row(
@@ -109,7 +119,12 @@ class MainApp(ft.View):
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
+                ft.Row(
+                    [self.empty_home_view_add_fab_btn],
+                    expand=True
+                )
             ],
+            expand=True,
             alignment=ft.CrossAxisAlignment.CENTER,
             visible=self.get_single_task_item() is not None,
         )
@@ -167,18 +182,12 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [
-                        ft.Container(
-                            content=ft.FloatingActionButton(
-                                icon=ft.Icons.ADD,
-                                on_click=lambda _: page.go("/list"),
-                            ),
-                            alignment=ft.Alignment(0.5, 0.5),
-                        )
-                    ],
+                    [self.empty_home_view_add_fab_btn],
+                    expand=True,
                 ),
             ],
-            alignment=ft.CrossAxisAlignment.STRETCH,
+            expand=True,
+            alignment=ft.CrossAxisAlignment.CENTER,
             visible=self.get_single_task_item() is None,
         )
         # /focus View
@@ -266,6 +275,7 @@ class MainApp(ft.View):
                                 self.select_task_view,
                                 self.empty_tasks_home_view,
                             ],
+                            expand=True,
                             alignment=ft.MainAxisAlignment.CENTER,
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
