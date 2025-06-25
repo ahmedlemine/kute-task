@@ -151,6 +151,8 @@ class ListTasksView(ft.Column):
             task = Task(title=self.new_task.value)
             added_task_id = api.add_task(task)
             added_task = api.get_task(str(added_task_id))
+            self.page.open(ft.SnackBar(ft.Text("New task added.")))
+
             task_control = TaskControl(
                 added_task,
                 self.task_status_change,
@@ -169,11 +171,13 @@ class ListTasksView(ft.Column):
 
     def task_title_update(self, task, title):
         updated_task = api.update_task_title(str(task.id), title)
+        self.page.open(ft.SnackBar(ft.Text("Task updated.")))
         task.title = updated_task.title
         self.update()
 
     def task_delete(self, task_item, task_id):
         api.delete_task(str(task_id))
+        self.page.open(ft.SnackBar(ft.Text("Task deleted.")))
         self.tasks.controls.remove(task_item)
         self.update()
 
