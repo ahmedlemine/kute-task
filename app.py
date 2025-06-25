@@ -379,12 +379,14 @@ class MainApp(ft.View):
 
     def defer_task(self, task, e):
         self.api.defer_task(str(task.id))
+        e.page.open(ft.SnackBar(ft.Text(f"Defered: {task.title}")))
         self.single_task_display_text.value = self.get_single_task_item().title
         e.page.update()
 
     def set_current_focus_task(self, e):
         current_task = self.get_single_task_item()
         self.current_focus_task = current_task
+        e.page.open(ft.SnackBar(ft.Text(f"Set Current task: {current_task.title}")))
 
         self.current_task_display.value = current_task.title
         self.current_task_display.visible = True
@@ -397,6 +399,7 @@ class MainApp(ft.View):
     def finish_current_task(self, e):
         task_to_finish = self.current_focus_task
         self.api.toggle_complete(str(task_to_finish.id))
+        e.page.open(ft.SnackBar(ft.Text(f"Win! You completed: {task_to_finish.title}")))
 
         self.current_focus_task = None
         self.current_task_display.visible = False
@@ -411,6 +414,8 @@ class MainApp(ft.View):
         else:
             self.select_task_view.visible = False
             self.empty_tasks_home_view.visible = True
+            e.page.open(ft.SnackBar(ft.Text("Win: you completed all tasks!")))
+
         e.page.update()
         e.page.go("/")
 
