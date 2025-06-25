@@ -32,7 +32,23 @@ class Drawer(ft.NavigationDrawer):
                 icon=ft.Icon(ft.Icons.SETTINGS_OUTLINED),
                 selected_icon=ft.Icons.SETTINGS,
             ),
+            ft.NavigationDrawerDestination(
+                label="About",
+                icon=ft.Icon(ft.Icons.INFO_OUTLINE),
+                selected_icon=ft.Icons.INFO,
+            ),
         ]
+
+
+# info for /about view
+about = {
+    "name": "Kute Task",
+    "version": "0.5",
+    "author": "Ahmed Lemine",
+    "email": "ahmed.lemine@yahoo.com",
+    "description": "A task tracking app that shows you only one task at a time and lets you choose to do it or defer it.",
+    "supportme_url": "https://buymeacoffee.com/ahmedlemine",
+}
 
 
 class MainApp(ft.View):
@@ -42,7 +58,7 @@ class MainApp(ft.View):
         page.on_route_change = self.route_change
         self.drawer = Drawer(self.handle_drwr_change)
         self.task_list = self.get_task_list_from_db()
-        self.routes = ["/", "/focus", "/list", "/settings"]
+        self.routes = ["/", "/focus", "/list", "/settings", "/about"]
         self.single_task_item = self.get_single_task_item()
         self.current_focus_task = None
 
@@ -359,6 +375,63 @@ class MainApp(ft.View):
                     self.settings_view,
                 ],
             ),
+            "/about": ft.View(
+                "/about",
+                [
+                    self.drawer,
+                    ft.AppBar(
+                        title=ft.Text("About the app"),
+                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    ),
+                    ft.Column(
+                        [
+                            ft.Row(
+                                [
+                                    ft.Text(
+                                        about["name"],
+                                        style=ft.TextThemeStyle.HEADLINE_SMALL,
+                                    ),
+                                ]
+                            ),
+                            ft.Row(
+                                [
+                                    ft.Text(
+                                        f"version: {about['version']}",
+                                        style=ft.TextThemeStyle.BODY_LARGE,
+                                    ),
+                                ]
+                            ),
+                            ft.Row(
+                                [
+                                    ft.Text(
+                                        f"Created by: {about['author']}",
+                                        style=ft.TextThemeStyle.BODY_MEDIUM,
+                                    ),
+                                ]
+                            ),
+                            ft.Row(
+                                [
+                                    ft.Text(
+                                        about["email"],
+                                        style=ft.TextThemeStyle.BODY_MEDIUM,
+                                    ),
+                                ]
+                            ),
+                            ft.Row(
+                                [
+                                    ft.ElevatedButton(
+                                        "Buy me a coffee",
+                                        on_click=lambda e: self.open_bmc_url(
+                                            e, about["supportme_url"]
+                                        ),
+                                    )
+                                ],
+                            ),
+                        ],
+                        expand=True,
+                    ),
+                ],
+            ),
         }
 
     def get_task_list_from_db(self):
@@ -467,6 +540,9 @@ class MainApp(ft.View):
                     self.empty_tasks_home_view.visible = True
             page.views.append(self.page_views[page.route])
             page.update()
+
+    def open_bmc_url(self, e, url):
+        e.page.launch_url(url)
 
     def before_update(self):
         self.set_single_task_item()
