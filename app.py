@@ -223,17 +223,16 @@ class MainApp(ft.View):
             visible=self.get_single_task_item() is None,
         )
         # /focus View
+        self.focus_mode_title = ft.Text(
+            value="currently wroking on:",
+            visible=self.current_focus_task is not None,
+            theme_style=ft.TextThemeStyle.BODY_LARGE,
+            style=ft.TextStyle(color=ft.Colors.GREY_600),
+        )
         self.focus_mode_view = ft.Column(
             [
                 ft.Row(
-                    [
-                        ft.Text(
-                            value="currently wroking on:",
-                            visible=self.current_focus_task is not None,
-                            theme_style=ft.TextThemeStyle.BODY_LARGE,
-                            style=ft.TextStyle(color=ft.Colors.GREY_600),
-                        )
-                    ],
+                    [self.focus_mode_title],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
@@ -389,6 +388,7 @@ class MainApp(ft.View):
 
         self.current_task_display.value = current_task.title
         self.current_task_display.visible = True
+        self.focus_mode_title.visible = True
         self.current_task_done_btn.visible = True
         self.empty_current_task_view.visible = False
         e.page.go("/focus")
@@ -401,6 +401,7 @@ class MainApp(ft.View):
         self.current_focus_task = None
         self.current_task_display.visible = False
         self.current_task_done_btn.visible = False
+        self.focus_mode_title.visible = False
         self.empty_current_task_view.visible = True
         self.task_list_control.build()
 
