@@ -22,7 +22,7 @@ class Drawer(ft.NavigationDrawer):
                 selected_icon=ft.Icon(ft.Icons.WATCH_LATER),
             ),
             ft.NavigationDrawerDestination(
-                label="List Tasks",
+                label="Task List",
                 icon=ft.Icon(ft.Icons.LIST),
                 selected_icon=ft.Icons.LIST_OUTLINED,
             ),
@@ -219,9 +219,11 @@ class MainApp(ft.View):
                 ft.Row(
                     [
                         ft.Text(
-                            value="No unfinished tasks to select from. Please add some tasks to start.",
-                            theme_style=ft.TextThemeStyle.BODY_LARGE,
-                            max_lines=5,
+                            value="No unfinished tasks to select from.\n "
+                            + "Please use the '+' button to add at least two tasks to start.\n "
+                            + "You can also go to 'Task List' from the side menu to manage all tasks.",
+                            theme_style=ft.TextThemeStyle.HEADLINE_SMALL,
+                            max_lines=7,
                             width=320,
                             text_align=ft.TextAlign.CENTER,
                             style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
