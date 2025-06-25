@@ -1,6 +1,7 @@
 import flet as ft
 from api import TaskAPI
 from db import sqlite_url
+from models import Task
 from task_list_view import ListTasksView
 
 
@@ -61,11 +62,42 @@ class MainApp(ft.View):
         self.empty_home_view_add_fab_btn = ft.Container(
             content=ft.FloatingActionButton(
                 icon=ft.Icons.ADD,
-                on_click=lambda _: page.go("/list"),
+                on_click=self.add_new_task_fab_clicked,
             ),
             expand=True,
             alignment=ft.Alignment(1.0, 1.0),
-            padding=20,
+            padding=ft.padding.all(30),
+        )
+
+        self.add_new_task_textfield = ft.TextField(
+            label="Task Title",
+            on_submit=lambda e: self.add_new_task(e),
+            expand=True,
+            max_length=30,
+        )
+
+        self.bottom_sheet_add_task = ft.BottomSheet(
+            ft.Container(
+                ft.Column(
+                    [
+                        ft.Row([ft.Text("Add a new task")]),
+                        ft.Row([self.add_new_task_textfield]),
+                        ft.Row(
+                            [
+                                ft.FilledButton(
+                                    "add", on_click=lambda e: self.add_new_task(e)
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.END,
+                        ),
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    tight=True,
+                ),
+                padding=20,
+            ),
+            open=False,
+            on_dismiss=self.handle_bottom_sheet_dissmiss,
         )
 
         self.select_task_view = ft.Column(
@@ -120,9 +152,9 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [self.empty_home_view_add_fab_btn],
-                    expand=True
-                )
+                    [self.empty_home_view_add_fab_btn, self.bottom_sheet_add_task],
+                    expand=True,
+                ),
             ],
             expand=True,
             alignment=ft.CrossAxisAlignment.CENTER,
@@ -182,7 +214,7 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [self.empty_home_view_add_fab_btn],
+                    [self.empty_home_view_add_fab_btn, self.bottom_sheet_add_task],
                     expand=True,
                 ),
             ],
@@ -381,7 +413,30 @@ class MainApp(ft.View):
         e.page.update()
         e.page.go("/")
 
+    def add_new_task_fab_clicked(self, e):
+        self.bottom_sheet_add_task.open = True
+        e.page.update()
+
+    def add_new_task(self, e):
+        if self.add_new_task_textfield.value:
+            task = Task(title=self.add_new_task_textfield.value)
+            self.api.add_task(task)
+            self.single_task_item = self.get_single_task_item()
+            self.add_new_task_textfield.value = ""
+            self.bottom_sheet_add_task.open = False
+            self.empty_tasks_home_view.visible = False
+            self.select_task_view.visible = True
+            e.page.update()
+
+    def handle_bottom_sheet_dissmiss(self, e):
+        self.bottom_sheet_add_task.open = False
+        e.page.overlay.clear()
+        if self.bottom_sheet_add_task not in e.page.overlay:
+            e.page.overlay.append(self.bottom_sheet_add_task)
+        e.page.update()
+
     def handle_drwr_change(self, e):
+        e.page.overlay.clear()
         e.page.go(self.routes[e.control.selected_index])
         e.open = False
 
@@ -441,6 +496,7 @@ def main(page: ft.Page):
     page.on_view_pop = view_pop
     page.on_route_change = main_app.route_change
     page.go(page.route)
+    page.overlay.append(main_app.bottom_sheet_add_task)
 
 
 ft.app(main, view=ft.AppView.WEB_BROWSER)
