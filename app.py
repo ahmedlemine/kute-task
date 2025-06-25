@@ -82,7 +82,7 @@ class MainApp(ft.View):
             ),
             expand=True,
             alignment=ft.Alignment(1.0, 1.0),
-            padding=ft.padding.all(30),
+            padding=ft.padding.all(20),
         )
 
         self.add_new_task_textfield = ft.TextField(
@@ -452,7 +452,7 @@ class MainApp(ft.View):
 
     def defer_task(self, task, e):
         self.api.defer_task(str(task.id))
-        e.page.open(ft.SnackBar(ft.Text(f"Defered: {task.title}")))
+        e.page.open(ft.SnackBar(ft.Text(f"Deferred: {task.title}")))
         self.single_task_display_text.value = self.get_single_task_item().title
         e.page.update()
 
