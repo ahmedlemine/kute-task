@@ -43,7 +43,7 @@ class Drawer(ft.NavigationDrawer):
 # info for /about view
 about = {
     "name": "Kute Task",
-    "version": "0.5",
+    "version": "0.1.0",
     "author": "Ahmed Lemine",
     "email": "ahmed.lemine@yahoo.com",
     "description": "A task tracking app that shows you only one task at a time and lets you choose to do it or defer it.",
