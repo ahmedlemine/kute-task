@@ -201,15 +201,11 @@ class MainApp(ft.View):
                             padding=20,
                             content=ft.Text(
                                 value="No unfinished tasks to select from.\n "
-                                + "Please use the '+' button to go to the 'Task List'\n "
-                                + "and add at least two tasks to start,\n"
-                                + "\n"
-                                + "Then use 'Choose Task' from the side menu\n"
-                                + "to come back to this view and do your tasks\n"
-                                + "one at a time",
+                                + "Please use the '+' button to go to the 'Task List and add at least two tasks to start,\n"
+                                + "then use 'Choose Task' from the side menu to come back to this view and do your tasks one at a time",
                                 theme_style=ft.TextThemeStyle.BODY_LARGE,
                                 color=ft.Colors.GREY_600,
-                                max_lines=7,
+                                max_lines=10,
                                 width=320,
                                 text_align=ft.TextAlign.CENTER,
                                 style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
