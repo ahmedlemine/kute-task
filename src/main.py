@@ -503,6 +503,8 @@ class MainApp(ft.View):
         e.page.go("/")
 
     def add_new_task_fab_clicked(self, e):
+        if self.bottom_sheet_add_task not in e.page.overlay:
+            e.page.overlay.append(self.bottom_sheet_add_task)
         self.bottom_sheet_add_task.open = True
         e.page.update()
 
