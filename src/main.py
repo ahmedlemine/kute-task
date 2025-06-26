@@ -514,6 +514,7 @@ class MainApp(ft.View):
             task = Task(title=self.add_new_task_textfield.value)
             self.api.add_task(task)
             self.single_task_item = self.get_single_task_item()
+            self.single_task_display_text.value = self.single_task_item.title
             self.add_new_task_textfield.value = ""
             self.bottom_sheet_add_task.open = False
             self.empty_tasks_home_view.visible = False
