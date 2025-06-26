@@ -92,31 +92,6 @@ class MainApp(ft.View):
             max_length=30,
         )
 
-        self.bottom_sheet_add_task = ft.BottomSheet(
-            ft.Container(
-                ft.Column(
-                    [
-                        ft.Row([ft.Text("Add a new task")]),
-                        ft.Row([self.add_new_task_textfield]),
-                        ft.Row(
-                            [
-                                ft.FilledButton(
-                                    "add", on_click=lambda e: self.add_new_task(e)
-                                )
-                            ],
-                            alignment=ft.MainAxisAlignment.END,
-                        ),
-                        ft.Row([ft.Container(height=50, expand=True)]),
-                    ],
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    tight=True,
-                ),
-                padding=20,
-            ),
-            open=False,
-            on_dismiss=self.handle_bottom_sheet_dissmiss,
-        )
-
         self.select_task_view = ft.Column(
             [
                 ft.Row(
@@ -169,7 +144,7 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [self.empty_home_view_add_fab_btn, self.bottom_sheet_add_task],
+                    [self.empty_home_view_add_fab_btn],
                     expand=True,
                 ),
                 ft.Row([ft.Container(height=50, expand=True)]),
@@ -226,8 +201,11 @@ class MainApp(ft.View):
                             padding=20,
                             content=ft.Text(
                                 value="No unfinished tasks to select from.\n "
-                                + "Please use the '+' button to add at least two tasks to start.\n "
-                                + "You can also go to 'Task List' from the side menu to manage all tasks.",
+                                + "Please use the '+' button to go to the 'Task List'\n "
+                                + "and add at least two tasks to start,\n"
+                                + "\n"
+                                + "Then use 'Choose Task' from the side menu\n"
+                                + "to come back to this view",
                                 theme_style=ft.TextThemeStyle.BODY_LARGE,
                                 color=ft.Colors.GREY_600,
                                 max_lines=7,
@@ -240,7 +218,7 @@ class MainApp(ft.View):
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
                 ft.Row(
-                    [self.empty_home_view_add_fab_btn, self.bottom_sheet_add_task],
+                    [self.empty_home_view_add_fab_btn],
                     expand=True,
                 ),
                 ft.Row([ft.Container(height=50, expand=True)]),
@@ -504,30 +482,9 @@ class MainApp(ft.View):
         e.page.go("/")
 
     def add_new_task_fab_clicked(self, e):
-        if self.bottom_sheet_add_task not in e.page.overlay:
-            e.page.overlay.append(self.bottom_sheet_add_task)
-        self.bottom_sheet_add_task.open = True
-        e.page.update()
-
-    def add_new_task(self, e):
-        if self.add_new_task_textfield.value:
-            task = Task(title=self.add_new_task_textfield.value)
-            self.api.add_task(task)
-            self.single_task_item = self.get_single_task_item()
-            self.single_task_display_text.value = self.single_task_item.title
-            self.add_new_task_textfield.value = ""
-            self.bottom_sheet_add_task.open = False
-            self.empty_tasks_home_view.visible = False
-            self.select_task_view.visible = True
-            e.page.update()
-
-    def handle_bottom_sheet_dissmiss(self, e):
-        self.bottom_sheet_add_task.open = False
-        e.page.overlay.clear()
-        e.page.update()
+        e.page.go('/list')
 
     def handle_drwr_change(self, e):
-        e.page.overlay.clear()
         e.page.go(self.routes[e.control.selected_index])
         e.open = False
 
@@ -590,7 +547,6 @@ def main(page: ft.Page):
     page.on_view_pop = view_pop
     page.on_route_change = main_app.route_change
     page.go(page.route)
-    page.overlay.append(main_app.bottom_sheet_add_task)
 
 
 ft.app(main, view=ft.AppView.WEB_BROWSER)
