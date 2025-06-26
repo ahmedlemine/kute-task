@@ -82,7 +82,7 @@ class MainApp(ft.View):
             ),
             expand=True,
             alignment=ft.Alignment(1.0, 1.0),
-            padding=ft.padding.all(20),
+            padding=ft.padding.all(10),
         )
 
         self.add_new_task_textfield = ft.TextField(
@@ -171,6 +171,7 @@ class MainApp(ft.View):
                     [self.empty_home_view_add_fab_btn, self.bottom_sheet_add_task],
                     expand=True,
                 ),
+                ft.Row([ft.Container(height=50, expand=True)]),
             ],
             expand=True,
             alignment=ft.CrossAxisAlignment.CENTER,
@@ -218,16 +219,22 @@ class MainApp(ft.View):
             [
                 ft.Row(
                     [
-                        ft.Text(
-                            value="No unfinished tasks to select from.\n "
-                            + "Please use the '+' button to add at least two tasks to start.\n "
-                            + "You can also go to 'Task List' from the side menu to manage all tasks.",
-                            theme_style=ft.TextThemeStyle.HEADLINE_SMALL,
-                            max_lines=7,
-                            width=320,
-                            text_align=ft.TextAlign.CENTER,
-                            style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
-                        ),
+                        ft.Container(
+                            border=ft.border.all(1, "indigo"),
+                            border_radius=5,
+                            padding=20,
+                            content=ft.Text(
+                                value="No unfinished tasks to select from.\n "
+                                + "Please use the '+' button to add at least two tasks to start.\n "
+                                + "You can also go to 'Task List' from the side menu to manage all tasks.",
+                                theme_style=ft.TextThemeStyle.BODY_LARGE,
+                                color=ft.Colors.GREY_600,
+                                max_lines=7,
+                                width=320,
+                                text_align=ft.TextAlign.CENTER,
+                                style=ft.TextStyle(overflow=ft.TextOverflow.VISIBLE),
+                            ),
+                        )
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
@@ -235,6 +242,7 @@ class MainApp(ft.View):
                     [self.empty_home_view_add_fab_btn, self.bottom_sheet_add_task],
                     expand=True,
                 ),
+                ft.Row([ft.Container(height=50, expand=True)]),
             ],
             expand=True,
             alignment=ft.CrossAxisAlignment.CENTER,
