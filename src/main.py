@@ -520,8 +520,6 @@ class MainApp(ft.View):
     def handle_bottom_sheet_dissmiss(self, e):
         self.bottom_sheet_add_task.open = False
         e.page.overlay.clear()
-        if self.bottom_sheet_add_task not in e.page.overlay:
-            e.page.overlay.append(self.bottom_sheet_add_task)
         e.page.update()
 
     def handle_drwr_change(self, e):
