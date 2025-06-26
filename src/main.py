@@ -205,7 +205,8 @@ class MainApp(ft.View):
                                 + "and add at least two tasks to start,\n"
                                 + "\n"
                                 + "Then use 'Choose Task' from the side menu\n"
-                                + "to come back to this view",
+                                + "to come back to this view and do your tasks\n"
+                                + "one at a time",
                                 theme_style=ft.TextThemeStyle.BODY_LARGE,
                                 color=ft.Colors.GREY_600,
                                 max_lines=7,
