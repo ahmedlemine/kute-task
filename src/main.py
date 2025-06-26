@@ -106,6 +106,7 @@ class MainApp(ft.View):
                             ],
                             alignment=ft.MainAxisAlignment.END,
                         ),
+                        ft.Row([ft.Container(height=50, expand=True)]),
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     tight=True,
