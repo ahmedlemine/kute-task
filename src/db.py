@@ -29,7 +29,7 @@ def get_engine(db_url: str = sqlite_url):
     """
     base_dir.mkdir(exist_ok=True)
     try:
-        engine = create_engine(db_url, echo=True)
+        engine = create_engine(db_url, echo=False)
         insp = inspect(engine)
         db_table_exists = insp.has_table("task")
     except sqlalchemy_op_err as e:
