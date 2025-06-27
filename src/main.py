@@ -192,17 +192,35 @@ class MainApp(ft.View):
         )
 
         self.empty_tasks_home_view = ft.Column(
-            [   ft.Row([
-                ft.Icon(ft.Icons.PLAYLIST_ADD, size=100, color=ft.Colors.GREY_400)
-            ], alignment=ft.MainAxisAlignment.CENTER),
+            [
+                ft.Row(
+                    [
+                        ft.Icon(
+                            ft.Icons.PLAYLIST_ADD, size=100, color=ft.Colors.GREY_400
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [
+                        ft.Text(
+                            "No unfinished tasks to select from",
+                            theme_style=ft.TextThemeStyle.HEADLINE_SMALL,
+                            style=ft.TextStyle(color=ft.Colors.GREY_600),
+                            max_lines=2,
+                            width=320,
+                            text_align=ft.TextAlign.CENTER,
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
                 ft.Row(
                     [
                         ft.Container(
                             content=ft.Text(
-                                value="No unfinished tasks to select from.\n"
-                                + "\n"
-                                + "Please use the '+' button to go to the 'Task List' and add at least two tasks to start.\n"
-                                + "Then select 'Choose Task' from the side menu to come back to this view and do your tasks one at a time.",
+                                value="Please use the '+' button to go to the 'Task List' and add at least two tasks to start.\n"
+                                + "Then select 'Choose Task' from the side menu to come back to this view and\n"
+                                + "tackle your tasks one at a time.",
                                 theme_style=ft.TextThemeStyle.BODY_LARGE,
                                 color=ft.Colors.GREY_600,
                                 max_lines=10,
@@ -410,7 +428,9 @@ class MainApp(ft.View):
                                         on_click=lambda e: self.open_bmc_url(
                                             e, about["supportme_url"]
                                         ),
-                                        style=ft.ButtonStyle(padding=10, text_style=ft.TextStyle(size=15)),
+                                        style=ft.ButtonStyle(
+                                            padding=10, text_style=ft.TextStyle(size=15)
+                                        ),
                                     )
                                 ],
                             ),
@@ -480,7 +500,7 @@ class MainApp(ft.View):
         e.page.go("/")
 
     def add_new_task_fab_clicked(self, e):
-        e.page.go('/list')
+        e.page.go("/list")
 
     def handle_drwr_change(self, e):
         e.page.go(self.routes[e.control.selected_index])
