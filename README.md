@@ -1,7 +1,7 @@
 ## Kute Task App
 
 ### One Task at a Time
-Kute Task is not just another task tracking app. It has its own twist: showing only **one task at a time**, not a long list of tasks.
+Kute Task is not just another task tracking app. It has its own twist: showing only **one task at a time**, not an overwhelming, long list of tasks.
 
 ---
 ### 💡 The Idea
@@ -17,7 +17,7 @@ However, if instead you choose to do the task, the app removes all distraction a
 
 It's that simple. No distraction, no extra features.
 
-### 🎞️ Screenshots
+### 📸 Screenshots
 
 ![Home screen showing a single task](demo/task_select_view.png)
 
@@ -26,7 +26,7 @@ It's that simple. No distraction, no extra features.
 ![side menue](demo/side_menu.png)
 
 ### 🎯 Target Users
-The ideal user if Kute Task is anyone who wants a simple task tracking app that minimizes distraction and show only one task at a time, not a long list of tasks.
+The ideal user if Kute Task is anyone who wants a simple task tracking app that minimizes distraction and shows only one task at a time, not an overwhelming, long list of tasks.
 
 ### 🗄️ Tech Stack
 The app is written completely in Python. The UI is a [Flet](https://flet.dev/) app built on top of a simple API layer that interacts with a SQLite DB through [SQLModel](https://sqlmodel.tiangolo.com/).
@@ -38,6 +38,6 @@ The app is written completely in Python. The UI is a [Flet](https://flet.dev/) a
 
 
 ### 🖥️ Supported Platroms
-There are currently Linux and Android versions (found in [Realeses](releases/)).
+There are currently Linux and Android versions (found in [Realeses](https://github.com/ahmedlemine/kute-task/releases)).
 
 Windows, MacOS, iOS versions comming soon.
