@@ -405,11 +405,12 @@ class MainApp(ft.View):
                             ),
                             ft.Row(
                                 [
-                                    ft.ElevatedButton(
+                                    ft.FilledButton(
                                         "Buy me a coffee",
                                         on_click=lambda e: self.open_bmc_url(
                                             e, about["supportme_url"]
                                         ),
+                                        style=ft.ButtonStyle(padding=10, text_style=ft.TextStyle(size=15)),
                                     )
                                 ],
                             ),

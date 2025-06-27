@@ -114,6 +114,11 @@ class ListTasksView(ft.Column):
         self.height = 760
         self.controls = [
             ft.Row(
+                [
+                    ft.ElevatedButton("Back", on_click=lambda _: self.page.go("/")),
+                ]
+            ),
+            ft.Row(
                 controls=[
                     self.new_task,
                     ft.FloatingActionButton(
