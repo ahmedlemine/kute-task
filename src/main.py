@@ -192,17 +192,17 @@ class MainApp(ft.View):
         )
 
         self.empty_tasks_home_view = ft.Column(
-            [
+            [   ft.Row([
+                ft.Icon(ft.Icons.PLAYLIST_ADD, size=100, color=ft.Colors.GREY_400)
+            ], alignment=ft.MainAxisAlignment.CENTER),
                 ft.Row(
                     [
                         ft.Container(
-                            border=ft.border.all(1, "indigo"),
-                            border_radius=5,
-                            padding=20,
                             content=ft.Text(
-                                value="No unfinished tasks to select from.\n "
-                                + "Please use the '+' button to go to the 'Task List and add at least two tasks to start,\n"
-                                + "then use 'Choose Task' from the side menu to come back to this view and do your tasks one at a time",
+                                value="No unfinished tasks to select from.\n"
+                                + "\n"
+                                + "Please use the '+' button to go to the 'Task List' and add at least two tasks to start.\n"
+                                + "Then select 'Choose Task' from the side menu to come back to this view and do your tasks one at a time.",
                                 theme_style=ft.TextThemeStyle.BODY_LARGE,
                                 color=ft.Colors.GREY_600,
                                 max_lines=10,
