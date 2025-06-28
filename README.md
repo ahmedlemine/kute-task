@@ -37,7 +37,7 @@ The app is written completely in Python. The UI is a [Flet](https://flet.dev/) a
 - 📱 [Flet](https://flet.dev/)
 
 
-### 🖥️ Supported Platroms
+### 🖥️ Supported Platforms
 There are currently Linux and Android versions (found in [Realeses](https://github.com/ahmedlemine/kute-task/releases)).
 
 Windows, MacOS, iOS versions comming soon.
